@@ -1,3 +1,4 @@
+Adicionar Imagem e logo de fundo
 # Animark
 Este projeto criado por: @PHmore para a disciplina de Desenvolvimento web mobile, visa a criação de uma to-do-list de episódios de anime assistidos
 
@@ -31,7 +32,7 @@ O usuário poderá através de uma API que mostrará diversos animes, escolher q
 ![image](https://github.com/PHmore/Animark/assets/107047839/a8d83865-668e-44fe-8ced-033d79ab7219)
 
 ## Acesso ao Projeto
-link git
+Link git: `https://github.com/PHmore/Animark.git`
 
 ## Rodar o Projeto
 forma de rodar o projeto
