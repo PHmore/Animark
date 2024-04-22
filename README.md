@@ -6,7 +6,7 @@ Este projeto criado por: @PHmore para a disciplina de Desenvolvimento web mobile
 O usuário poderá através de uma API que mostrará diversos animes, escolher quais quer adicionar a sua lista, após feita a escolha os animes serão salvos na lista do usuário a qual ele poderá a medida que for assistindo os episódio ir marcando os já assistidos, para que assim tenha um controle sobre os episódios assistidos. A plataforma visa atender usuários que assistem episódios com um longo prazo de intervalo entre eles, pois estes usuários tendem a esquecer em qual episódio param de assistir.
 
 ## Autor
-| [<img loading="PHmore" src="https://avatars.githubusercontent.com/u/107047839?v=4" width=115><br><sub>Camila Fernanda Alves</sub>](https://github.com/PHmore) |
+[<img loading="PHmore" src="https://avatars.githubusercontent.com/u/107047839?v=4" width=115><br><sub>PHmore</sub>](https://github.com/PHmore)
 - Patryck Henryck Moreira Silva
 - Estudante de Ciência da Computação na UFT (Palmas-TO)
 - Contato: patryckhenryck401@gmail.com
