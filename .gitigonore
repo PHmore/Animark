@@ -1,0 +1,20 @@
+# # Arquivos temporários
+# *~
+
+# # Arquivos de log
+# *.log
+
+# # Diretórios de dependências e módulos
+# node_modules/
+# vendor/
+
+# # Arquivos de configuração local
+# .env
+# config.json
+
+# # Arquivos gerados durante a compilação
+# /dist
+# /build
+
+# Ocultado arquivo de configuração do Django
+ANIMARK/settings.py
