@@ -1,77 +1,59 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
+
 <head>
+    {% load static %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Login</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f2f2f2;
-            margin: 0;
-            padding: 0;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
 
-        .cadastro-container {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
-            width: 300px;
-        }
+    <link type="text/css" rel="stylesheet" href="{%static 'css/bootstrap/bootstrap.min.css' %}">
 
-        .cadastro-container h2 {
-            text-align: center;
-            margin-bottom: 20px;
-        }
+    <link type="text/css" rel="stylesheet" href="{%static 'css/login.css' %}">
+    
+    <link type="text/css" rel="stylesheet" href="{%static 'css/variaveis.css' %}">
 
-        .cadastro-container input[type="text"],
-        .cadastro-container input[type="password"],
-        .cadastro-container input[type="email"] {
-            width: calc(100% - 20px);
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 3px;
-        }
-
-        .cadastro-container input[type="submit"] {
-            width: 100%;
-            padding: 10px;
-            background-color: #007bff;
-            border: none;
-            color: #fff;
-            border-radius: 3px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        .cadastro-container input[type="submit"]:hover {
-            background-color: #0056b3;
-        }
-
-        .cadastro-container p {
-            text-align: center;
-            margin-top: 10px;
-        }
-    </style>
+     <script type="text/javascript"
+        src="{% static 'js/bootstrap.min.js' %}">
+    </script>
 </head>
-<body>
 
-<div class="cadastro-container">
-    <h2>Login</h2>
-    <form action="/" method="post">
-        {% csrf_token %}
-        <input type="email" name="email" placeholder="Email" required><br>
-        <input type="password" name="senha" placeholder="Senha" required><br>
-        <input type="submit" value="Fazer Login">
-    </form>
-    <a href="cadastro/">Fazer Cadastro</a>
-</div>
+<body class="main-bg">
+
+    <header class="heading">
+        <h1>ANIMARK</h1>
+    </header>
+
+    <div class="container">
+
+        <div class="info"></div>
+
+        <div class="cadastro-form">
+            <h2>Login</h2>
+            <form action="/" method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <input type="email" name="email" placeholder="Email" required><br>
+                    <input type="password" name="senha" placeholder="Senha" required><br>
+                </div>
+                <input type="submit" value="Fazer Login">
+            </form>
+            <a href="cadastro/">Fazer Cadastro</a>
+        </div>
+
+    </div>
+
+    <footer id="footer" class="footer white-bg">
+        <p>Feito por <a rel="nofollow" target="_blank" href="https://github.com/PHmore">PHmore</a></p>
+    </footer>
+
+    {% if mensagem %}
+    <div class="alert alert-danger" role="alert">
+        {{ mensagem }}
+    </div>
+    {% endif %}
 
 </body>
+
 </html>

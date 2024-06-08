@@ -16,7 +16,7 @@ class Login (View):
 		if not request.user.is_authenticated:
 			return render(request, 'aut_usuario/login.html',contexto)
 		else:
-			return redirect("/veiculo")
+			return redirect("/todo_list")
 
 	def post(self, request):
 
@@ -34,7 +34,7 @@ class Login (View):
 			if user.is_active:
 				login(request, user)
 				# return HttpResponse('Usuário autenticacao com sucesso!')
-				return redirect("/veiculo")
+				return redirect("/todo_list")
 
 			return render(request, 'aut_usuario/login.html',{'mensagem': 'Usuário inativo'})
 		print('Usuário ou senha inválido')
@@ -66,6 +66,8 @@ class Cadastro (View):
 		if user:
 			return HttpResponse("Usuário criado com sucesso")
 
+class LoginAPI(View):
+	print("O Login será feito por api")
     
 
 # def index(request):
