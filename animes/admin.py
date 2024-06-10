@@ -1,3 +1,18 @@
-from django.contrib import admin
+# animes/admin.py
 
-# Register your models here.
+from django.contrib import admin
+from .models import Anime, Episodio
+
+class EpisodioInline(admin.TabularInline):
+    model = Episodio
+    extra = 1
+
+@admin.register(Anime)
+class AnimeAdmin(admin.ModelAdmin):
+    inlines = [EpisodioInline]
+
+@admin.register(Episodio)
+class EpisodioAdmin(admin.ModelAdmin):
+    list_display = ('episode_number', 'title', 'watched')
+    list_filter = ('watched', 'title')
+    search_fields = ('title',)

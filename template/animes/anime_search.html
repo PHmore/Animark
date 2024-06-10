@@ -1,0 +1,24 @@
+<!-- animes/templates/animes/anime_search.html -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Anime Search</title>
+</head>
+<body>
+    <h1>Search for Anime</h1>
+    <form method="get" action="{% url 'anime_search' %}">
+        <input type="text" name="q" placeholder="Search for an anime...">
+        <button type="submit">Search</button>
+    </form>
+
+    <h2>Results:</h2>
+    <ul>
+        {% for anime in animes %}
+            <li>{{ anime.title }}</li>
+        {% empty %}
+            <li>No results found.</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

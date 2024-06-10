@@ -1,0 +1,57 @@
+<!-- top_anime_list.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Top Animes</title>
+</head>
+
+<body>
+    <h1>Top Animes {{anime_data|length}} </h1>
+    <ul>
+        <!-- Tomar cuidado com tratamento de dicionários ou itens únicos -->
+        {% for anime in anime_data %}
+        <li>
+            <p>MAL ID: {{ anime.mal_id }}</p>
+            <p>Título: {{ anime.title }}</p>
+            <p>Número de episódios: {{ anime.episodes }}</p>
+            <img src="{{ anime.images.jpg.image_url }}" alt="Imagem do Anime">
+        </li>
+        {% endfor %}
+    </ul>
+    {{page_obj}}
+    <div class="pagination">
+        {% if page_obj.has_previous_page %}
+        <a href="?page={{ page_obj.current_page|add:" -1" }}">Página Anterior</a>
+        {% endif %}
+
+        Página {{ page_obj.current_page }} de {{ page_obj.last_visible_page }}
+
+        {% if page_obj.has_next_page %}
+        <a href="?page={{ page_obj.current_page|add:" 1" }}">Próxima Página</a>
+        {% endif %}
+
+    </div>
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+<!-- <ul>
+        {% for anime in anime_list.data %}
+            <li>{{ anime.titles.0.title }}</li>
+            <img src="{{ anime.images.jpg.image_url }}" alt="{{ anime.titles.0.title }}">
+        {% endfor %}
+    </ul>
+</body>
+</html>
+ -->
