@@ -13,6 +13,6 @@ class AnimeAdmin(admin.ModelAdmin):
 
 @admin.register(Episodio)
 class EpisodioAdmin(admin.ModelAdmin):
-    list_display = ('episode_number', 'title', 'watched')
-    list_filter = ('watched', 'title')
-    search_fields = ('title',)
+    list_display = ('numero',  'assistido')
+    list_filter = ('assistido', 'numero')
+    search_fields = ('numero',)

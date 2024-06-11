@@ -15,7 +15,8 @@
     <h2>Results:</h2>
     <ul>
         {% for anime in animes %}
-            <li>{{ anime.title }}</li>
+            <li>
+                <a href="?id={{ anime.mal_id }}">{{ anime.title }}</a></li>
         {% empty %}
             <li>No results found.</li>
         {% endfor %}

@@ -17,9 +17,16 @@ class AnimeDataSerializer(serializers.Serializer):
     # Outros dados interessantes adicionar aqui
     images = serializers.DictField(child=ImageSerializer())
     episodes = serializers.IntegerField()
+    status = serializers.CharField()
 
 # Aqui é feita a serialização do objeto como um todo
 class AnimeResponseSerializer(serializers.Serializer):
     data = AnimeDataSerializer(many=True)
+    pagination = serializers.DictField(required=False)
+    status = serializers.IntegerField(required=False)
+
+# Ao contrário do método acima este é para serializar itens únicos no caso uma lista
+class AnimeInfoResponseSerializer(serializers.Serializer):
+    data = AnimeDataSerializer(many=False)
     pagination = serializers.DictField(required=False)
     status = serializers.IntegerField(required=False)

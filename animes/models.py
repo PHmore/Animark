@@ -1,25 +1,34 @@
 from django.db import models
+from datetime import datetime
 
 class Anime(models.Model):
-    title = models.CharField(max_length=255)
-    watched = models.BooleanField(default=False)
-    description = models.TextField(blank=True, null=True)
+    titulo = models.CharField(max_length=255)
+    assistido = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return self.title
+        return '{0} - {1}'.format (
+            self.titulo,
+            self.assistido,
+        )
+
+    def tempo_assistindo(self):
+        return datetime.now().day - self.created_at
+
+    @property
+    def anime_novo(self):
+        return self.created_at == datetime.now().day
     
 class Episodio(models.Model):
     anime = models.ForeignKey(Anime, related_name='episodios', on_delete=models.CASCADE)
-    episode_number = models.PositiveIntegerField()
-    title = models.CharField(max_length=255, blank=True, null=True)
-    watched = models.BooleanField(default=False)
+    numero = models.PositiveIntegerField()
+    assistido = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        unique_together = ('anime', 'episode_number')
+        unique_together = ('anime', 'numero')
 
     def __str__(self):
-        return f"{self.anime.title} - Episódio {self.episode_number}"
+        return f"{self.anime.titulo} - Episódio {self.numero}"

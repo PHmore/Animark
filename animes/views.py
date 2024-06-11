@@ -1,29 +1,26 @@
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.views.generic import ListView, CreateView, UpdateView
-from .serializers import AnimeResponseSerializer
+from .serializers import AnimeResponseSerializer, AnimeInfoResponseSerializer
 from .anime_service import AnimeService
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from animes.models import Anime, Episodio
+from django.views.generic import View
 
-class AnimeListViefdsfw(ListView):
-    template_name = 'animes/anime_list.html'
-
-    # Aqui é passado o nome do objeto que será acessado pelo Html
-    context_object_name = 'anime_list'
-    paginate_by = 10  # Número de animes por página
-    print("Mostrar top animes")
-
+class AnimeSrcView(ListView):
+    template_name = 'animes/anime_search.html'
+    context_object_name = 'animes_src'
+    print("Pesquisar nome do anime")
+    
     def get_queryset(self):
-        page_number = self.request.GET.get('page', 1)
-        print(page_number)
-        anime_list = AnimeService.get_anime_list(page_number)
-        # print(anime_list)
-
-        # Para retornar somente a data a qual é nomeada pelo contexto e enviada para o html
-        return anime_list
-        # page_number = self.request.GET.get('page',1)
-        # data = AnimeService.get_anime_list(page_number)
-        # return data['data'] if 'data' in data else []
+        query = self.request.GET.get('q')
+        print(query)
+        anime_src = AnimeService.get_search_anime(query)
+        print(anime_src)
+        if query:
+            return anime_src
+        return []
 
 class AnimeListView(APIView):
     def get(self, request, *args, **kwargs):
@@ -54,17 +51,49 @@ class AnimeListView(APIView):
             return Response(errors, status=400)
 
 class AnimeInfo(APIView):
-    print("Será exibida informações sobre o anime aqui")
-class AnimeSrcView(ListView):
-    template_name = 'animes/anime_search.html'
-    context_object_name = 'animes'
     
-    def get_queryset(self):
-        query = self.request.GET.get('q')
-        if query:
-            return AnimeService.search_anime(query)
+    def get(self, request):
+    
+        query = request.GET.get('data_id')
+        print("Anime id: ",query)
+        anime_info = AnimeService.get_anime_info(query)
+
+        # Como neste caso é passado uma lista e não um dicionário por conter apenas um item o many deve ser definido como False sendo o inverso dado como True
+        serializer = AnimeInfoResponseSerializer(data=anime_info)
+        
+        print("\n\nA info foi serializada: ",serializer)
+
+        if serializer.is_valid():
+            serialized_data = serializer.data
+            data_list = serialized_data.get('data', [])
+            print("\n\nA info foi serializada: ",data_list)
+            return JsonResponse(serialized_data)
+        print("\n\nA info foi  não serializada!!!! ")
         return []
-    
+      
+class AnimeTaskCreate(View):
+    def post(self,request):
+        titulo_anime = request.POST.get('title')
+        # descricao_anime = request.POST.get('descricao_anime')
+        # episodios = request.POST.getlist('episodios')
+        episodios = request.POST.get('episodes')
+        print("Titulo: ",titulo_anime," Episidios: ",episodios)
+        episodios = int(episodios)
+        novo_anime = Anime.objects.create(titulo=titulo_anime,assistido=False,)
+
+        for ep in range(1, episodios+1):
+            numero_episodio = ep
+
+            Episodio.objects.create(
+                anime=novo_anime,
+                numero=numero_episodio,
+            )
+        
+        return HttpResponse('Anime e episodios criados com sucesso')
+
+
+
+
 # Classes sem uso de api 
 # animes/views.py
 

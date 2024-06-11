@@ -7,22 +7,9 @@ from .models import Anime
 from .serializers import AnimeSerializer
 
 from django.views.generic import CreateView, UpdateView, ListView
-from .models import Task
-from .forms import TaskForm
 
 class TaskListView(ListView):
-    model = Task
-    template_name = 'todo_list/task_list.html'
-    context_object_name = 'tasks'
-
-class TaskCreateView(CreateView):
-    model = Task
-    form_class = TaskForm
-    template_name = 'todo_list/task_form.html'
-    success_url = reverse_lazy('task_list')
-
-class TaskUpdateView(UpdateView):
-    model = Task
-    form_class = TaskForm
-    template_name = 'todo_list/task_form.html'
-    success_url = reverse_lazy('task_list')
+    template_name='todo_list/home.html'
+    context_object_name='animes_task'
+    def get_queryset(self):
+        print("Será mostrado as tasks pendentes")

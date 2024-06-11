@@ -30,12 +30,14 @@ class AnimeService:
         response = requests.get(f'{cls.BASE_URL}/anime/{anime_id}')
         if response.status_code == 200:
             anime_data = response.json()
-            return {'title': anime_data.get('title', 'Unknown'), 'image_url': anime_data.get('image_url', '')}
-        return {'title': 'Unknown', 'image_url': ''}
+            print("Id do anime na consulta a API: ",anime_id)
+            print(anime_data)
+            return anime_data
+        return anime_data
 
     @classmethod
-    def search_anime(cls, query):
-        response = requests.get(f'{cls.BASE_URL}/anime', params={'q': query})
+    def get_search_anime(cls, query):
+        response = requests.get(f'{cls.BASE_URL}/anime/', params={'q': query})
         if response.status_code == 200:
             return response.json()['data']
         return []
