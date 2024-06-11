@@ -1,5 +1,5 @@
 from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views.generic import ListView, CreateView, UpdateView
 from .serializers import AnimeResponseSerializer, AnimeInfoResponseSerializer
 from .anime_service import AnimeService
@@ -8,13 +8,13 @@ from rest_framework.response import Response
 from animes.models import Anime, Episodio
 from django.views.generic import View
 
+# Falta serializar este adicionar botões de adicionar e mostrar na página html corretamente
 class AnimeSrcView(ListView):
     template_name = 'animes/anime_search.html'
     context_object_name = 'animes_src'
-    print("Pesquisar nome do anime")
     
     def get_queryset(self):
-        query = self.request.GET.get('q')
+        query = self.request.GET.get('anime_nome')
         print(query)
         anime_src = AnimeService.get_search_anime(query)
         print(anime_src)
@@ -89,7 +89,8 @@ class AnimeTaskCreate(View):
                 numero=numero_episodio,
             )
         
-        return HttpResponse('Anime e episodios criados com sucesso')
+        # return render()
+        return redirect("/to_do_list")
 
 
 
