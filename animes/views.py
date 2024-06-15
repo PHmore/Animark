@@ -9,18 +9,33 @@ from animes.models import Anime, Episodio
 from django.views.generic import View
 
 # Falta serializar este adicionar botões de adicionar e mostrar na página html corretamente
-class AnimeSrcView(ListView):
-    template_name = 'animes/anime_search.html'
-    context_object_name = 'animes_src'
+
+from rest_framework import status
+
+class AnimeSrcView(APIView):
     
-    def get_queryset(self):
+    def get(self, request, *args, **kwargs):
         query = self.request.GET.get('anime_nome')
-        print(query)
+        print("Query:", query)
+        
         anime_src = AnimeService.get_search_anime(query)
-        print(anime_src)
-        if query:
-            return anime_src
-        return []
+        
+        # Verificando a estrutura dos dados retornados
+        print("Dados recebidos:", anime_src)
+        
+        serializer = AnimeResponseSerializer(data=anime_src)
+        
+        if serializer.is_valid():
+            serialized_data = serializer.data
+            print("\n\nA info foi serializada: ", serialized_data)
+            return render(request, 'animes/anime_list.html', {
+                'anime_data': serialized_data.get('data', []),
+                'page_obj': serialized_data.get('pagination', {}),
+            })
+        
+        print("\n\nA info não foi serializada!!!! ", serializer.errors)
+        return Response(serializer.errors)
+
 
 class AnimeListView(APIView):
     def get(self, request, *args, **kwargs):

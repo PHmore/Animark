@@ -6,5 +6,5 @@ from todo_list.views import *
 from django.urls import path
 
 urlpatterns = [
-    path('', AnimeTaskList.as_view(), name='task_list'),
+    path('', AnimeTaskList.as_view(), name='to_do_list'),
 ]

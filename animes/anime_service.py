@@ -36,8 +36,20 @@ class AnimeService:
         return anime_data
 
     @classmethod
-    def get_search_anime(cls, query):
-        response = requests.get(f'{cls.BASE_URL}/anime/', params={'q': query})
+    # Exemplo de pesquisa
+    def get_search_anime(cls,anime_nome, limit=10):
+        url = "https://api.jikan.moe/v4/anime"
+        params = {
+            'q': anime_nome,
+            'limit': limit
+        }
+
+        response = requests.get(url, params=params)
         if response.status_code == 200:
-            return response.json()['data']
-        return []
+            data = response.json()
+            return data
+        else:
+            print(f"Error: {response.status_code}")
+            return data
+
+

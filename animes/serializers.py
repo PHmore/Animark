@@ -15,6 +15,7 @@ class AnimeDataSerializer(serializers.Serializer):
     # Status
     # Ano
     # Outros dados interessantes adicionar aqui
+    
     images = serializers.DictField(child=ImageSerializer())
     episodes = serializers.IntegerField()
     status = serializers.CharField()

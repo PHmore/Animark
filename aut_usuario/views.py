@@ -34,7 +34,7 @@ class Login (View):
 			if user.is_active:
 				login(request, user)
 				# return HttpResponse('Usuário autenticacao com sucesso!')
-				return redirect("/todo_list")
+				return redirect("/to_do_list")
 
 			return render(request, 'aut_usuario/login.html',{'mensagem': 'Usuário inativo'})
 		print('Usuário ou senha inválido')
@@ -60,11 +60,13 @@ class Cadastro (View):
 		user = User.objects.filter(email=email).first()
 		
 		if user:
-			return HttpResponse("Já existe um usuário com este email")
+			
+			return render(request, 'aut_usuario/cadastro.html',{'mensagem':'Já existe um usuário com este email'})
 		
 		user = User.objects.create_user(username=username, email=email, password=senha)
 		if user:
-			return HttpResponse("Usuário criado com sucesso")
+			
+			return render(request, 'to_do_list',{'mensagem':'Usuário cadastrado com sucesso'})
 
 class LoginAPI(View):
 	print("O Login será feito por api")
