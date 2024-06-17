@@ -37,10 +37,12 @@
         </li>
         <p>Número de episódios: {{ anime.episodes }}</p>
         <img src="{{ anime.images.jpg.image_url }}" alt="Imagem do Anime">
+        <strong>Está na Lista:</strong> {% if anime.in_list %}Sim{% else %}Não{% endif %}<br>
         <form id="anime-form" method="POST" action="{% url 'task_create' %}">
             {% csrf_token %}
             <input type="hidden" name="episodes" value="{{anime.episodes}}">
             <input type="hidden" name="title" value="{{anime.title}}">
+            <input type="hidden" name="mal_id" value="{{anime.mal_id}}">
             <input class="btn btn-success" type="submit" value="Adicionar">
             </form>
 

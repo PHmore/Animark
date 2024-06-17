@@ -5,10 +5,22 @@
     {% block conteudo %}
     <h1>Lista de Animes e Episódios</h1>
     {% for anime, episodios in anime_dict.items %}
+    <p>{{anime.id}}</p>
+    <p>{{anime}}</p>
         <h2>{{ anime.titulo }}</h2>
+        <form action="{% url 'excluir-task' pk=anime.id %}" method="post">
+            {% csrf_token %}
+            <input type="submit" value="Excluir" class="btn btn-danger">
+        </form>
         <ul>
             {% for episodio in episodios %}
-                <li>{{ episodio.numero }}: Assistido: {{ episodio.assistido }}</li>
+                <li>{{ episodio.numero }}: Assistido: {{ episodio.assistido }}
+                    <form action="{% url 'marcar-ep' anime.id episodio.id %}" method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit">Alternar Assistido</button></form>
+                </li>
+                
+
             {% endfor %}
         </ul>
     {% endfor %}

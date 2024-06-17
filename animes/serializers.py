@@ -5,7 +5,6 @@ class ImageSerializer(serializers.Serializer):
     small_image_url = serializers.URLField()
     large_image_url = serializers.URLField()
 
-
 # Aqui colocaremos quais dados usaremos para fazer a serialização de data
 class AnimeDataSerializer(serializers.Serializer):
     mal_id = serializers.IntegerField()
@@ -17,8 +16,14 @@ class AnimeDataSerializer(serializers.Serializer):
     # Outros dados interessantes adicionar aqui
     
     images = serializers.DictField(child=ImageSerializer())
-    episodes = serializers.IntegerField()
+    episodes = serializers.IntegerField(allow_null=True, default=1)
     status = serializers.CharField()
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        if representation.get('episodes') is None:
+            representation['episodes'] = 1
+        return representation
 
 # Aqui é feita a serialização do objeto como um todo
 class AnimeResponseSerializer(serializers.Serializer):

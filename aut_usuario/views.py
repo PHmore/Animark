@@ -16,7 +16,7 @@ class Login (View):
 		if not request.user.is_authenticated:
 			return render(request, 'aut_usuario/login.html',contexto)
 		else:
-			return redirect("/todo_list")
+			return redirect("/to_do_list")
 
 	def post(self, request):
 

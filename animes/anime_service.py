@@ -37,11 +37,10 @@ class AnimeService:
 
     @classmethod
     # Exemplo de pesquisa
-    def get_search_anime(cls,anime_nome, limit=10):
+    def get_search_anime(cls,anime_nome):
         url = "https://api.jikan.moe/v4/anime"
         params = {
             'q': anime_nome,
-            'limit': limit
         }
 
         response = requests.get(url, params=params)

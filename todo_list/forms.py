@@ -1,9 +1,17 @@
-# todo_list/forms.py
+# forms.py
 
 from django import forms
-from .models import Task
+from animes.models import Episodio
 
-class TaskForm(forms.ModelForm):
+class MarcarForm(forms.ModelForm):
     class Meta:
-        model = Task
-        fields = ['title', 'due_date', 'completed', 'anime', 'episodio']
+        model = Episodio
+        fields = []  # Nenhum campo será exibido no formulário, 
+        # pois não haverá entrada do usuário para as alterações feitas
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.assistido = not instance.assistido
+        if commit:
+            instance.save()
+        return instance
