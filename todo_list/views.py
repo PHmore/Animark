@@ -1,13 +1,26 @@
 from django.shortcuts import get_object_or_404, redirect, render
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView, TemplateView
+from django.views.generic import UpdateView, DeleteView, TemplateView
+from rest_framework.generics import ListAPIView ,DestroyAPIView
 from django.urls import reverse_lazy
 from animes.models import Anime, Episodio
 from .forms import MarcarForm
 
+# Tornar o login obrigatório
+from django.contrib.auth.mixins import LoginRequiredMixin
+
+# Importações para este arquivo
+from django.core.exceptions import ObjectDoesNotExist
+from django.http import FileResponse, Http404
+
+# Importações para tokens
+from rest_framework.authentication import TokenAuthentication, SessionAuthentication
+from rest_framework import permissions
 
 # Ver como modificar para que o retorno seja por ordem de atualização e os completos fiquem no final
 
-class AnimeTaskList(TemplateView):
+# Talvez seja possível fazer para que todas as operações GET, POST, PUT E DELETE fiquem em uma só classe e sejam métodos da API
+
+class AnimeTaskList(LoginRequiredMixin, TemplateView):
     template_name='todo_list/home.html'
 
     def get_context_data(self, **kwargs):
@@ -24,7 +37,7 @@ class createTask ():
     def post():
         print("A criação de tasks será movida para essa view")
 
-class updateTask (UpdateView):
+class updateTask (LoginRequiredMixin,UpdateView):
     model = Episodio
     template_name = 'todo_list/home.html'
     # success_url = reverse_lazy('to_do_list')
@@ -54,9 +67,33 @@ class updateTask (UpdateView):
     #     # Redireciona de volta para a lista de tarefas
     #     return reverse_lazy('to_do_list')
     
-class deleteTask (DeleteView):
+class deleteTask (LoginRequiredMixin, DeleteView):
     model = Anime
     # template_name = 'todo_list/home.html'
     success_url = reverse_lazy('to_do_list')
 
 # Talvez adicionar um método para quando o anime for interamente assistido
+"""
+class APIListarVeiculos(ListAPIView):
+    
+    # View para listar instâncias de veículos (por meio da API REST)
+    
+    serializer_class = SerializadorVeiculo
+
+    # Colocando autenticações por meio de tokens para a API
+    # Colocando a autorização por sessão permitimos a usuários logados pelo navegador acessar a API
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    # Sendo isto um array podemos construir nossos próprios requisitos
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset (self):
+        return Veiculo.objects.all()
+
+class APIDeletarTask (DestroyAPIView):
+    serializer_class = SerializadorVeiculo    
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset (self):
+        return Veiculo.objects.all()
+"""

@@ -1,6 +1,6 @@
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
 from django.shortcuts import render, redirect
-from django.views.generic import ListView, CreateView, UpdateView, View
+from django.views.generic import View
 from .serializers import AnimeResponseSerializer, AnimeInfoResponseSerializer
 from .anime_service import AnimeService
 from rest_framework.views import APIView
@@ -9,41 +9,13 @@ from animes.models import Anime, Episodio
 
 # Falta serializar este adicionar botões de adicionar e mostrar na página html corretamente
 
-from rest_framework import status
 
-class AnimeSrcView(APIView):
-    
-    def get(self, request, *args, **kwargs):
-        query = self.request.GET.get('anime_nome')
-        print("Query:", query)
-        
-        anime_src = AnimeService.get_search_anime(query)
-        
-        # Verificando a estrutura dos dados retornados
-        # print("Dados recebidos:", anime_src)
-        print("Quantidade de dados recebidos:", len(anime_src))
-        
-        serializer = AnimeResponseSerializer(data=anime_src)
-        
-        if serializer.is_valid():
-            serialized_data = serializer.data
-            # print("\n\nA info foi serializada: ", serialized_data)
-            return render(request, 'animes/anime_list.html', {
-                'anime_data': serialized_data.get('data', []),
-                'page_obj': serialized_data.get('pagination', {}),
-            })
-        
-        print("\n\nA info não foi serializada!!!! ", serializer.errors)
-        return Response(serializer.errors)
-
-
-from django.shortcuts import render
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from .serializers import AnimeResponseSerializer
+from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import Anime
 
-class AnimeListView(APIView):
+from rest_framework import status
+
+class AnimeListView(LoginRequiredMixin,APIView):
     def get(self, request, *args, **kwargs):
         page_number = request.GET.get('page', 1)
         anime_data = AnimeService.get_anime_list(page_number)
@@ -81,7 +53,7 @@ class AnimeListView(APIView):
 # Iteração e Adição de in_list: Para cada anime recebido da API (data_list), verificamos se o mal_id está presente em db_anime_ids. Se estiver, definimos anime['in_list'] como True; caso contrário, como False.
 # Renderização da Página: No retorno da renderização da página, passamos data_list atualizado, que agora inclui o campo in_list, junto com outros dados necessários como pagination_data.
 
-class AnimeInfo(APIView):
+class AnimeInfo(LoginRequiredMixin, APIView):
     
     def get(self, request):
     
@@ -101,8 +73,33 @@ class AnimeInfo(APIView):
             return JsonResponse(serialized_data)
         print("\n\nA info foi  não serializada!!!! ")
         return []
+
+class AnimeSrcView(LoginRequiredMixin,APIView):
+    
+    def get(self, request, *args, **kwargs):
+        query = self.request.GET.get('anime_nome')
+        print("Query:", query)
+        
+        anime_src = AnimeService.get_search_anime(query)
+        
+        # Verificando a estrutura dos dados retornados
+        # print("Dados recebidos:", anime_src)
+        print("Quantidade de dados recebidos:", len(anime_src))
+        
+        serializer = AnimeResponseSerializer(data=anime_src)
+        
+        if serializer.is_valid():
+            serialized_data = serializer.data
+            # print("\n\nA info foi serializada: ", serialized_data)
+            return render(request, 'animes/anime_list.html', {
+                'anime_data': serialized_data.get('data', []),
+                'page_obj': serialized_data.get('pagination', {}),
+            })
+        
+        print("\n\nA info não foi serializada!!!! ", serializer.errors)
+        return Response(serializer.errors)
       
-class AnimeTaskCreate(View):
+class AnimeTaskCreate(LoginRequiredMixin,View):
     def post(self,request):
         titulo_anime = request.POST.get('title')
         # descricao_anime = request.POST.get('descricao_anime')
@@ -125,26 +122,55 @@ class AnimeTaskCreate(View):
         # return render()
         return redirect("/to_do_list")
 
+class AnimeListAPI(APIView):
+    def get(self, request, *args, **kwargs):
+        page_number = request.GET.get('page', 1)
+        anime_data = AnimeService.get_anime_list(page_number)
+        serializer = AnimeResponseSerializer(data=anime_data)
+        if serializer.is_valid():
+            serialized_data = serializer.data
+            data_list = serialized_data.get('data', [])
+            pagination_data = serialized_data.get('pagination', {})
+            db_anime_ids = set(Anime.objects.values_list('mal_id', flat=True))
+            for anime in data_list:
+                anime_id = anime.get('mal_id')
+                anime['in_list'] = anime_id in db_anime_ids
+            return Response({
+                'anime_data': data_list,
+                'page_obj': pagination_data,
+            }, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class AnimeInfoAPI(APIView):
+    def get(self, request):
+        query = request.GET.get('data_id')
+        anime_info = AnimeService.get_anime_info(query)
+        serializer = AnimeInfoResponseSerializer(data=anime_info)
+        if serializer.is_valid():
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class AnimeSrcAPI(APIView):
+    def get(self, request, *args, **kwargs):
+        query = self.request.GET.get('anime_nome')
+        anime_src = AnimeService.get_search_anime(query)
+        serializer = AnimeResponseSerializer(data=anime_src)
+        if serializer.is_valid():
+            serialized_data = serializer.data
+            return Response({
+                'anime_data': serialized_data.get('data', []),
+                'page_obj': serialized_data.get('pagination', {}),
+            }, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-# Classes sem uso de api 
-# animes/views.py
-
-# class AnimeListView(ListView):
-#     model = Anime
-#     template_name = 'animes/anime_list.html'
-#     context_object_name = 'animes'
-#     print("Puxou a view 2")
-
-# class AnimeCreateView(CreateView):
-#     model = Anime
-#     form_class = AnimeForm
-#     template_name = 'animes/anime_form.html'
-#     success_url = reverse_lazy('anime_list')
-
-# class AnimeUpdateView(UpdateView):
-#     model = Anime
-#     form_class = AnimeForm
-#     template_name = 'animes/anime_form.html'
-#     success_url = reverse_lazy('anime_list')
+class AnimeTaskCreateAPI(APIView):
+    def post(self, request):
+        titulo_anime = request.data.get('title')
+        episodios = request.data.get('episodes')
+        episodios = int(episodios)
+        mal_id = request.data.get('mal_id')
+        mal_id = int(mal_id)
+        novo_anime = Anime.objects.create(mal_id=mal_id, titulo=titulo_anime, assistido=False)
+        for ep in range(1, episodios + 1):
+            Episodio.objects.create(anime=novo_anime, numero=ep)
+        return Response({'mensagem': 'Anime criado com sucesso'}, status=status.HTTP_201_CREATED)

@@ -8,5 +8,7 @@ urlpatterns = [
     path('',Login.as_view(),name='index'),
     path('logout/',Logout.as_view(),name='logout'),
     path('cadastro/',Cadastro.as_view(),name='cadastro'),
-    path('aut_api/',LoginAPI.as_view()),
+    path('api/login/', LoginAPI.as_view(), name='api-login'),
+    path('api/logout/', LogoutAPI.as_view(), name='api-logout'),
+    path('api/cadastro/', CadastroAPI.as_view(), name='api-cadastro'),
 ]
