@@ -1,14 +1,15 @@
-# Exemplo de uso do serializers
-
 # animes/serializers.py
 from rest_framework import serializers
-from .models import Anime
+from animes.models import Anime, Episodio
+
+class EpisodioSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Episodio
+        fields = '__all__'
 
 class AnimeSerializer(serializers.ModelSerializer):
-    titulo = serializers.SerializerMethodField()
-    assistido = serializers.SerializerMethodField()
-    created_at = serializers.SerializerMethodField()
-    updated_at = serializers.SerializerMethodField()
+    episodios = EpisodioSerializer(many=True, read_only=True)
+
     class Meta:
         model = Anime
-        fields = ['id', 'titulo']
+        fields = '__all__'

@@ -1,5 +1,6 @@
 # Como feito pelo professor usamos a view do sistema básico de configuração na própria pasta raiz
 
+from django.forms import ValidationError
 from django.views.generic import View
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
@@ -11,6 +12,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework import generics, status
 from rest_framework.views import APIView
+from rest_framework.exceptions import AuthenticationFailed
 
 from .serializers import RegisterSerializer
 
@@ -70,27 +72,41 @@ class Cadastro (View):
 		
 		user = User.objects.create_user(username=username, email=email, password=senha)
 		if user:
+			print("Olá")
 			
-			return render(request, 'to_do_list',{'mensagem':'Usuário cadastrado com sucesso'})
+			return render(request, 'aut_usuario/login.html',{'mensagem':'Usuário cadastrado com sucesso'})
+			# Ou poderemos fazer o redireicionamento para a página de visualização das tasks
+			# return redirect("/to_do_list")
 
 class LoginAPI(ObtainAuthToken):
-	def post(self, request, *args, **kwargs):
-		serializer = self.serializer_class(
-			data = request.data,
-			context={
-				'request':request
-			}
-		)
-		serializer.is_valid(raise_exception=True)
-		user=serializer.validated_data['user']
-		token, created = Token.objects.get_or_create(user=user)
-		return Response({
-			'id':user.id,
-			'nome':user.first_name,
-			'email':user.email,
-			'token':token.key
-		})
-	
+    def post(self, request, *args, **kwargs):
+        print("Fazendo Login pela API")
+        print("Recebido os dados: ", request.data)
+        serializer = self.serializer_class(
+            data=request.data,
+            context={'request': request}
+        )
+        print("Entrou no serializador")
+		# Esta flag é usada quando o usuário não existe e o retorno é vazio
+        if not serializer.is_valid():
+           return Response({'detail': 'Credenciais inválidas.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        print("Antes do Usuário")
+        print("Dados válidados : ",serializer.validated_data)
+        user = serializer.validated_data['user']
+        print("Usuário", user)
+        token, created = Token.objects.get_or_create(user=user)
+        print(f"Recebido: {user}")
+
+        if user is not None:
+            return Response({
+				'id': user.id,
+				'nome': user.first_name,
+				'email': user.email,
+				'token': token.key
+			})
+		
+
 class LogoutAPI(APIView):
     def post(self, request):
         if request.auth:
@@ -102,6 +118,10 @@ class LogoutAPI(APIView):
 
 class CadastroAPI(APIView):
     def post(self, request):
+		
+        email = request.data.get('email')
+        senha = request.data.get('senha')
+
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
