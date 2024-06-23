@@ -95,21 +95,22 @@ class APIDeletarTask(DestroyAPIView):
         return Anime.objects.all()
 
 class APIAtualizarTask(APIView):
-
-    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
     
-    def post(self, request, anime_id, episode_id):
+    def put(self, request, anime_id, episode_id):
+        print("Anime_id: ",anime_id," Episódio id: ",episode_id)
         try:
             anime = Anime.objects.get(id=anime_id)
             episodio = Episodio.objects.get(anime=anime, id=episode_id)
         except (Anime.DoesNotExist, Episodio.DoesNotExist):
             return Response({"error": "Anime or Episodio not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        form = MarcarForm(instance=episodio)
-        if form.is_valid():
-            form.save()
-            return Response({"message": "Episodio updated successfully"}, status=status.HTTP_200_OK)
+        # Altera o valor do campo assistido para seu inverso
+        episodio.assistido = not episodio.assistido
+        episodio.save()
+
+        return Response({"message": "Episodio updated successfully"}, status=status.HTTP_200_OK)
         return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # class APICriarTask(viewsets.ViewSet):
