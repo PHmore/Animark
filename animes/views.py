@@ -13,7 +13,10 @@ from animes.models import Anime, Episodio
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import Anime
 
-from rest_framework import status
+from rest_framework import permissions, viewsets, status
+from rest_framework.authentication import TokenAuthentication, SessionAuthentication
+
+from rest_framework.permissions import IsAuthenticated
 
 class AnimeListView(LoginRequiredMixin,APIView):
     def get(self, request, *args, **kwargs):
@@ -31,7 +34,7 @@ class AnimeListView(LoginRequiredMixin,APIView):
             status_code = serialized_data.get('status')
             
             # Obter todos os IDs de animes no banco de dados
-            db_anime_ids = set(Anime.objects.values_list('mal_id', flat=True))
+            db_anime_ids = set(Anime.objects.filter(user=self.request.user).values_list('mal_id', flat=True))
             
             # Iterar sobre os dados da API e adicionar o campo 'in_list'
             for anime in data_list:
@@ -87,10 +90,19 @@ class AnimeSrcView(LoginRequiredMixin,APIView):
         print("Quantidade de dados recebidos:", len(anime_src))
         
         serializer = AnimeResponseSerializer(data=anime_src)
+
+        
         
         if serializer.is_valid():
             serialized_data = serializer.data
             # print("\n\nA info foi serializada: ", serialized_data)
+            db_anime_ids = set(Anime.objects.filter(user=self.request.user).values_list('mal_id', flat=True))
+            
+            # Iterar sobre os dados da API e adicionar o campo 'in_list'
+            for anime in serialized_data.get('data', []):
+                anime_id = anime.get('mal_id')
+                anime['in_list'] = anime_id in db_anime_ids
+
             return render(request, 'animes/anime_list.html', {
                 'anime_data': serialized_data.get('data', []),
                 'page_obj': serialized_data.get('pagination', {}),
@@ -101,6 +113,7 @@ class AnimeSrcView(LoginRequiredMixin,APIView):
       
 class AnimeTaskCreate(LoginRequiredMixin,View):
     def post(self,request):
+        
         titulo_anime = request.POST.get('title')
         # descricao_anime = request.POST.get('descricao_anime')
         # episodios = request.POST.getlist('episodios')
@@ -109,7 +122,11 @@ class AnimeTaskCreate(LoginRequiredMixin,View):
         episodios = int(episodios)
         mal_id = request.POST.get('mal_id')
         mal_id = int(mal_id)
-        novo_anime = Anime.objects.create(mal_id=mal_id,titulo=titulo_anime,assistido=False,)
+        novo_anime = Anime.objects.create(
+            user=request.user,
+            mal_id=mal_id,
+            titulo=titulo_anime,
+            assistido=False,)
 
         for ep in range(1, episodios+1):
             numero_episodio = ep
@@ -123,6 +140,9 @@ class AnimeTaskCreate(LoginRequiredMixin,View):
         return redirect("/to_do_list")
 
 class AnimeListAPI(APIView):
+    print("Listando por API")
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
     def get(self, request, *args, **kwargs):
         page_number = request.GET.get('page', 1)
         anime_data = AnimeService.get_anime_list(page_number)
@@ -151,12 +171,19 @@ class AnimeInfoAPI(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class AnimeSrcAPI(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
     def get(self, request, *args, **kwargs):
         query = self.request.GET.get('anime_nome')
         anime_src = AnimeService.get_search_anime(query)
         serializer = AnimeResponseSerializer(data=anime_src)
         if serializer.is_valid():
             serialized_data = serializer.data
+            db_anime_ids = set(Anime.objects.filter(user=self.request.user).values_list('mal_id', flat=True))
+            # Iterar sobre os dados da API e adicionar o campo 'in_list'
+            for anime in serialized_data.get('data', []):
+                anime_id = anime.get('mal_id')
+                anime['in_list'] = anime_id in db_anime_ids
             return Response({
                 'anime_data': serialized_data.get('data', []),
                 'page_obj': serialized_data.get('pagination', {}),
@@ -164,13 +191,19 @@ class AnimeSrcAPI(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class AnimeTaskCreateAPI(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
     def post(self, request):
         titulo_anime = request.data.get('title')
         episodios = request.data.get('episodes')
         episodios = int(episodios)
         mal_id = request.data.get('mal_id')
         mal_id = int(mal_id)
-        novo_anime = Anime.objects.create(mal_id=mal_id, titulo=titulo_anime, assistido=False)
+        novo_anime = Anime.objects.create(
+            user=request.user,
+            mal_id=mal_id, 
+            titulo=titulo_anime, 
+            assistido=False)
         for ep in range(1, episodios + 1):
             Episodio.objects.create(anime=novo_anime, numero=ep)
         return Response({'mensagem': 'Anime criado com sucesso'}, status=status.HTTP_201_CREATED)

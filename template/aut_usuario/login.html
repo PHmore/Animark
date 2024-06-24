@@ -34,7 +34,8 @@
             <form action="/" method="post">
                 {% csrf_token %}
                 <div class="form-group">
-                    <input type="email" name="email" placeholder="Email" required><br>
+                    <input type="text" name="username" placeholder="Username" required><br>
+                    <!-- <input type="email" name="email" placeholder="Email" required><br> -->
                     <input type="password" name="senha" placeholder="Senha" required><br>
                 </div>
                 <input type="submit" value="Fazer Login">

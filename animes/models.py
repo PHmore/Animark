@@ -1,5 +1,6 @@
 from django.db import models
 from datetime import datetime
+from django.contrib.auth.models import User
 
 class Anime(models.Model):
     
@@ -7,7 +8,7 @@ class Anime(models.Model):
 
 # null=True: Permite que o campo no banco de dados aceite valores nulos. Isso significa que, se nenhum valor for fornecido para mal_id, o banco de dados permitirá que esse campo seja nulo.
 # blank=True: Permite que o formulário de criação ou edição não exija um valor para esse campo. Ou seja, no formulário Django, você pode deixar o campo mal_id em branco sem gerar um erro de validação.
-
+    user = models.ForeignKey(User, on_delete=models.CASCADE,default=1,)
     mal_id = models.PositiveIntegerField(null=True, blank=True)
     titulo = models.CharField(max_length=255)
     assistido = models.BooleanField(default=False)

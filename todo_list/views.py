@@ -29,45 +29,41 @@ from rest_framework.permissions import IsAuthenticated
 # Talvez seja possível fazer para que todas as operações GET, POST, PUT E DELETE fiquem em uma só classe e sejam métodos da API
 
 class AnimeTaskList(LoginRequiredMixin, TemplateView):
-    template_name='todo_list/home.html'
+    template_name = 'todo_list/home.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        animes = Anime.objects.all()
-        # Aqui definiremos para que o retorno seja feito em ordem de update
-        anime_dict = {anime: anime.episodios.all().order_by('numero') for anime in animes}
-        # anime_dict = {animes: animes}
+        user = self.request.user
+        animes = Anime.objects.filter(user=user)
+        anime_dict = {anime: anime.episodios.all().order_by('-assistido', 'numero') for anime in animes}
         context['anime_dict'] = anime_dict
-        print("Retornando as seguintes tasks: ",context)
         return context
 
 class createTask ():
     def post():
         print("A criação de tasks será movida para essa view")
 
-class updateTask (LoginRequiredMixin,UpdateView):
+class updateTask(LoginRequiredMixin, UpdateView):
     model = Episodio
     template_name = 'todo_list/home.html'
-    # success_url = reverse_lazy('to_do_list')
-
     form_class = MarcarForm
-    # fields = []  # Nenhum campo será exibido no formulário
-    # template_name = 'to_do_list/toggle_assistido.html'  # Você pode criar um template vazio ou omiti-lo
 
     def get_object(self, queryset=None):
         anime_id = self.kwargs.get('anime_id')
         episode_id = self.kwargs.get('episode_id')
-        anime = get_object_or_404(Anime, pk=anime_id)
+        anime = get_object_or_404(Anime, pk=anime_id, user=self.request.user)
         return get_object_or_404(Episodio, pk=episode_id, anime=anime)
 
     def form_valid(self, form):
         form.save()
         return redirect(reverse_lazy('to_do_list'))
 
-class deleteTask (LoginRequiredMixin, DeleteView):
+class deleteTask(LoginRequiredMixin, DeleteView):
     model = Anime
-    # template_name = 'todo_list/home.html'
     success_url = reverse_lazy('to_do_list')
+
+    def get_queryset(self):
+        return Anime.objects.filter(user=self.request.user)
 
 # Talvez adicionar um método para quando o anime for interamente assistido
 
@@ -75,43 +71,42 @@ class APIListarTask(ListAPIView):
     """
     View para listar instâncias de animes (por meio da API REST)
     """
+
     serializer_class = AnimeSerializer
     authentication_classes = [TokenAuthentication, SessionAuthentication]
     permission_classes = [permissions.IsAuthenticated]
-
+        
     def get_queryset(self):
-        print("Listando por API as tasks: ", Anime.objects.all())
-        return Anime.objects.all()
+        user = self.request.user
+        return Anime.objects.filter(user=user).order_by('-updated_at')
 
 class APIDeletarTask(DestroyAPIView):
-    """
-    View para deletar instâncias de animes (por meio da API REST)
-    """
     serializer_class = AnimeSerializer
     authentication_classes = [TokenAuthentication]
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return Anime.objects.all()
+        user = self.request.user
+        return Anime.objects.filter(user=user)
+
 
 class APIAtualizarTask(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
     
     def put(self, request, anime_id, episode_id):
-        print("Anime_id: ",anime_id," Episódio id: ",episode_id)
         try:
-            anime = Anime.objects.get(id=anime_id)
+            anime = Anime.objects.get(id=anime_id, user=request.user)
             episodio = Episodio.objects.get(anime=anime, id=episode_id)
         except (Anime.DoesNotExist, Episodio.DoesNotExist):
             return Response({"error": "Anime or Episodio not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        # Altera o valor do campo assistido para seu inverso
         episodio.assistido = not episodio.assistido
         episodio.save()
 
         return Response({"message": "Episodio updated successfully"}, status=status.HTTP_200_OK)
-        return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 # class APICriarTask(viewsets.ViewSet):
 #     """

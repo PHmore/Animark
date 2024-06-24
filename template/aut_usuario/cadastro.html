@@ -19,7 +19,8 @@
     <h2>Cadastro</h2>
     <form action="/cadastro/" method="post">
         {% csrf_token %}
-        <input type="email" name="email" placeholder="Email" required><br>
+        <input type="text" name="username" placeholder="Username" required><br>
+        <!-- <input type="email" name="email" placeholder="Email" required><br> -->
         <input type="password" name="senha" placeholder="Senha" required><br>
         <input type="submit" value="Cadastrar">
     </form>

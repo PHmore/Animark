@@ -31,7 +31,8 @@ class Login (View):
 
 		# Obtém as credenciais de autenticação do formulário
 		# O 'usuario' e a 'senha' devem ser os mesmo nomeados na view
-		usuario = request.POST.get ('email',None)
+		# usuario = request.POST.get ('email',None)
+		usuario = request.POST.get ('username',None)
 		senha = request.POST.get('senha',None)
 
 		# Verifica as credenciais de autenticação fornecidas
@@ -59,18 +60,19 @@ class Cadastro (View):
 		return render(request,'aut_usuario/cadastro.html')
 	
 	def post(self, request):
-		username = request.POST.get('email',None)
-		email = request.POST.get('email',None)
+		username = request.POST.get('username',None)
+		# username = request.POST.get('email',None)
+		# email = request.POST.get('email',None)
 		senha = request.POST.get('senha',None)
-		print("Realizando cadastro de: email: ",email," Senha: ",senha)
+		print("Realizando cadastro de: username: ",username," Senha: ",senha)
 		
-		user = User.objects.filter(email=email).first()
+		user = User.objects.filter(username=username).first()
 		
 		if user:
 			
-			return render(request, 'aut_usuario/cadastro.html',{'mensagem':'Já existe um usuário com este email'})
+			return render(request, 'aut_usuario/cadastro.html',{'mensagem':'Já existe um usuário com este username'})
 		
-		user = User.objects.create_user(username=username, email=email, password=senha)
+		user = User.objects.create_user(username=username, password=senha)
 		if user:
 			print("Olá")
 			
@@ -101,6 +103,7 @@ class LoginAPI(ObtainAuthToken):
         if user is not None:
             return Response({
 				'id': user.id,
+				'username':user.username,
 				'nome': user.first_name,
 				'email': user.email,
 				'token': token.key
@@ -119,7 +122,7 @@ class LogoutAPI(APIView):
 class CadastroAPI(APIView):
     def post(self, request):
 		
-        email = request.data.get('email')
+        username = request.data.get('username')
         senha = request.data.get('senha')
 
         serializer = RegisterSerializer(data=request.data)
@@ -128,6 +131,7 @@ class CadastroAPI(APIView):
             token, created = Token.objects.get_or_create(user=user)
             return Response({
                 'id': user.id,
+				'username':user.username,
                 'email': user.email,
                 'token': token.key
             }, status=status.HTTP_201_CREATED)
