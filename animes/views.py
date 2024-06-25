@@ -18,7 +18,7 @@ from rest_framework.authentication import TokenAuthentication, SessionAuthentica
 
 from rest_framework.permissions import IsAuthenticated
 
-class AnimeListView(LoginRequiredMixin,APIView):
+class AnimeListView(LoginRequiredMixin,View):
     def get(self, request, *args, **kwargs):
         page_number = request.GET.get('page', 1)
         anime_data = AnimeService.get_anime_list(page_number)
@@ -42,6 +42,8 @@ class AnimeListView(LoginRequiredMixin,APIView):
                 anime['in_list'] = anime_id in db_anime_ids
             
             # Renderizar a página com os dados serializados
+            print('OBJETOS DE PÁGINA: ',pagination_data)
+
             return render(request, 'animes/anime_list.html', {
                 'anime_data': data_list,
                 'page_obj': pagination_data,
@@ -56,7 +58,7 @@ class AnimeListView(LoginRequiredMixin,APIView):
 # Iteração e Adição de in_list: Para cada anime recebido da API (data_list), verificamos se o mal_id está presente em db_anime_ids. Se estiver, definimos anime['in_list'] como True; caso contrário, como False.
 # Renderização da Página: No retorno da renderização da página, passamos data_list atualizado, que agora inclui o campo in_list, junto com outros dados necessários como pagination_data.
 
-class AnimeInfo(LoginRequiredMixin, APIView):
+class AnimeInfo(LoginRequiredMixin, View):
     
     def get(self, request):
     
@@ -77,26 +79,31 @@ class AnimeInfo(LoginRequiredMixin, APIView):
         print("\n\nA info foi  não serializada!!!! ")
         return []
 
-class AnimeSrcView(LoginRequiredMixin,APIView):
-    
+class AnimeSrcView(LoginRequiredMixin, View):
+    # Foi necessário o uso de sessão para podermos armazenar o valor da pesquisa anterior e fazer as paginações corretamente
     def get(self, request, *args, **kwargs):
-        query = self.request.GET.get('anime_nome')
+        query = request.GET.get('anime_nome')  # Obtém o valor atual de anime_nome da query string
+        page = request.GET.get('page')
+
+        if query is not None:
+            # Se o query não for None, atualiza a sessão
+            request.session['last_anime_nome'] = query
+        else:
+            # Caso contrário, verifica se há um valor na sessão para usar
+            query = request.session.get('last_anime_nome', None)
+        
         print("Query:", query)
+        print("ULTIMO ANIME :", request.session['last_anime_nome'])
         
-        anime_src = AnimeService.get_search_anime(query)
+        anime_src = AnimeService.get_search_anime(query,page)
         
-        # Verificando a estrutura dos dados retornados
-        # print("Dados recebidos:", anime_src)
         print("Quantidade de dados recebidos:", len(anime_src))
         
         serializer = AnimeResponseSerializer(data=anime_src)
 
-        
-        
         if serializer.is_valid():
             serialized_data = serializer.data
-            # print("\n\nA info foi serializada: ", serialized_data)
-            db_anime_ids = set(Anime.objects.filter(user=self.request.user).values_list('mal_id', flat=True))
+            db_anime_ids = set(Anime.objects.filter(user=request.user).values_list('mal_id', flat=True))
             
             # Iterar sobre os dados da API e adicionar o campo 'in_list'
             for anime in serialized_data.get('data', []):
@@ -109,7 +116,10 @@ class AnimeSrcView(LoginRequiredMixin,APIView):
             })
         
         print("\n\nA info não foi serializada!!!! ", serializer.errors)
-        return Response(serializer.errors)
+        # Aqui você pode tratar o erro de serialização como desejado
+        return render(request, 'animes/error_page.html', {
+            'error_message': 'Erro ao processar os dados do anime.'
+        })
       
 class AnimeTaskCreate(LoginRequiredMixin,View):
     def post(self,request):
@@ -151,7 +161,7 @@ class AnimeListAPI(APIView):
             serialized_data = serializer.data
             data_list = serialized_data.get('data', [])
             pagination_data = serialized_data.get('pagination', {})
-            db_anime_ids = set(Anime.objects.values_list('mal_id', flat=True))
+            db_anime_ids = set(Anime.objects.filter(user=self.request.user).values_list('mal_id', flat=True))
             for anime in data_list:
                 anime_id = anime.get('mal_id')
                 anime['in_list'] = anime_id in db_anime_ids
@@ -175,7 +185,8 @@ class AnimeSrcAPI(APIView):
     permission_classes = [IsAuthenticated]
     def get(self, request, *args, **kwargs):
         query = self.request.GET.get('anime_nome')
-        anime_src = AnimeService.get_search_anime(query)
+        page = self.request.GET.get('page')
+        anime_src = AnimeService.get_search_anime(query,page)
         serializer = AnimeResponseSerializer(data=anime_src)
         if serializer.is_valid():
             serialized_data = serializer.data

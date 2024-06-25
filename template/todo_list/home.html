@@ -1,29 +1,147 @@
 {% extends "../base.html" %}
 
-    {% block titulo %} To do List {% endblock %}
+{% block titulo %} To do List {% endblock %}
 
-    {% block conteudo %}
-    <h1>Lista de Animes e Episódios</h1>
-    {% for anime, episodios in anime_dict.items %}
-    <p>{{anime.id}}</p>
-    <p>{{anime}}</p>
-        <h2>{{ anime.titulo }}</h2>
-        <form action="{% url 'excluir-task' pk=anime.id %}" method="post">
-            {% csrf_token %}
-            <input type="submit" value="Excluir" class="btn btn-danger">
-        </form>
-        <ul>
+{% block css_local %}
+{% load static %}
+<link type="text/css" rel="stylesheet" href="{% static 'css/to_do_list.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+{% endblock %}
+
+{% block conteudo %}
+
+{% for anime, episodios in anime_dict.items %}
+<div class="anime-section">
+    <label class="collapsible">
+        <span>{{ anime.titulo }}</span>
+        <input type="checkbox" class="toggle-checkbox" style="display: none;">
+        <i class="fas fa-chevron-down"></i>
+    </label>
+    <div class="content" style="display: none;">
+        <ul class="list-group list-group-light" id="episode-list-{{ anime.id }}">
             {% for episodio in episodios %}
-                <li>{{ episodio.numero }}: Assistido: {{ episodio.assistido }}
-                    <form action="{% url 'marcar-ep' anime.id episodio.id %}" method="post" style="display:inline;">
+            <li class="list-group-item px-3 border-0 episode-item" data-episode-id="{{ episodio.id }}" data-assistido="{{ episodio.assistido }}">
+                <div class="episode-details">
+                    <span class="episode-number {% if episodio.assistido %}marked{% endif %}">Episódio Número: {{ episodio.numero }}</span>
+                    <div class="checkbox-wrapper-8">
                         {% csrf_token %}
-                        <button type="submit">Alternar Assistido</button></form>
-                </li>
-                
-
+                        <input id="cb3-{{ episodio.id }}" type="checkbox" name="assistido" class="assistido-checkbox tgl tgl-skewed" data-anime-id="{{ anime.id }}" data-episodio-id="{{ episodio.id }}" {% if episodio.assistido %} checked {% endif %}>
+                        <label class="tgl-btn" data-tg-off="OFF" data-tg-on="VISTO" for="cb3-{{ episodio.id }}"></label>
+                    </div>
+                </div>
+            </li>
+            
             {% endfor %}
+            <li class="list-group-item px-3 border-0">
+                <form action="{% url 'excluir-task' pk=anime.id %}" method="post">
+                    {% csrf_token %}
+                    <input type="submit" value="Excluir" class="btn btn-danger">
+                </form>
+            </li>
         </ul>
-    {% endfor %}
+    </div>
+</div>
+{% endfor %}
 
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var toggleCheckboxes = document.querySelectorAll('.toggle-checkbox');
+    toggleCheckboxes.forEach(function (checkbox) {
+        checkbox.addEventListener('change', function () {
+            var content = this.closest('.anime-section').querySelector('.content');
+            var icon = this.closest('.collapsible').querySelector('i');
+            if (this.checked) {
+                content.style.display = 'block';
+                icon.classList.add('active');
+            } else {
+                content.style.display = 'none';
+                icon.classList.remove('active');
+            }
+        });
+    });
 
-    {% endblock %}
+    var assistidoCheckboxes = document.querySelectorAll('.assistido-checkbox');
+    assistidoCheckboxes.forEach(function (checkbox) {
+        checkbox.addEventListener('change', function () {
+            var animeId = this.getAttribute('data-anime-id');
+            var episodioId = this.getAttribute('data-episodio-id');
+            var assistido = this.checked;
+            var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+            fetch("{% url 'marcar-ep' 0 0 %}".replace('0/0', `${animeId}/${episodioId}`), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    assistido: assistido
+                })
+            }).then(response => {
+                if (response.ok) {
+                    // Update the episode position in the list
+                    updateEpisodePosition(animeId, episodioId, assistido);
+                } else {
+                    // Handle error
+                    console.error('Erro na atualização do episódio.');
+                }
+            }).catch(error => {
+                // Handle error
+                console.error('Erro na requisição:', error);
+            });
+        });
+    });
+
+    function updateEpisodePosition(animeId, episodioId, assistido) {
+        var episodeList = document.getElementById(`episode-list-${animeId}`);
+        var episodeItem = episodeList.querySelector(`.episode-item[data-episode-id="${episodioId}"]`);
+        var episodeNumber = episodeItem.querySelector('.episode-number');
+
+        // Set data-assistido attribute
+        episodeItem.setAttribute('data-assistido', assistido);
+
+        // Update episode number style
+        if (assistido) {
+            episodeNumber.classList.add('marked');
+        } else {
+            episodeNumber.classList.remove('marked');
+        }
+
+        // Get all episode items
+        var episodeItems = Array.from(episodeList.querySelectorAll('.episode-item'));
+
+        // Separate into assistidos e não assistidos
+        var assistidos = episodeItems.filter(item => item.getAttribute('data-assistido') === 'true');
+        var naoAssistidos = episodeItems.filter(item => item.getAttribute('data-assistido') !== 'true');
+
+        // Ordenar os episódios pelo número do episódio
+        assistidos.sort(function(a, b) {
+            var numeroA = parseInt(a.querySelector('.episode-number').textContent.match(/\d+/)[0]);
+            var numeroB = parseInt(b.querySelector('.episode-number').textContent.match(/\d+/)[0]);
+            return numeroA - numeroB;
+        });
+
+        naoAssistidos.sort(function(a, b) {
+            var numeroA = parseInt(a.querySelector('.episode-number').textContent.match(/\d+/)[0]);
+            var numeroB = parseInt(b.querySelector('.episode-number').textContent.match(/\d+/)[0]);
+            return numeroA - numeroB;
+        });
+
+        // Limpar a lista de episódios
+        while (episodeList.firstChild) {
+            episodeList.removeChild(episodeList.firstChild);
+        }
+
+        // Adicionar os itens de episódio ordenados de volta à lista
+        naoAssistidos.forEach(function(item) {
+            episodeList.appendChild(item);
+        });
+
+        assistidos.forEach(function(item) {
+            episodeList.appendChild(item);
+        });
+    }
+});
+</script>
+
+{% endblock %}

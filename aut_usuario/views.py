@@ -76,7 +76,7 @@ class Cadastro (View):
 		if user:
 			print("Olá")
 			
-			return render(request, 'aut_usuario/login.html',{'mensagem':'Usuário cadastrado com sucesso'})
+			return redirect("/to_do_list")
 			# Ou poderemos fazer o redireicionamento para a página de visualização das tasks
 			# return redirect("/to_do_list")
 
@@ -109,7 +109,6 @@ class LoginAPI(ObtainAuthToken):
 				'token': token.key
 			})
 		
-
 class LogoutAPI(APIView):
     def post(self, request):
         if request.auth:
@@ -119,24 +118,27 @@ class LogoutAPI(APIView):
 
 # views.py
 
-class CadastroAPI(APIView):
-    def post(self, request):
-		
-        username = request.data.get('username')
-        senha = request.data.get('senha')
-
+class CadastroAPI(ObtainAuthToken):
+    def post(self, request, *args, **kwargs):
+        print("Fazendo Cadastro pela API")
+        print("Recebido os dados: ", request.data)
         serializer = RegisterSerializer(data=request.data)
+        
         if serializer.is_valid():
             user = serializer.save()
+            print("Usuário criado: ", user)
             token, created = Token.objects.get_or_create(user=user)
             return Response({
                 'id': user.id,
-				'username':user.username,
+                'username': user.username,
+                'nome': user.first_name,
                 'email': user.email,
                 'token': token.key
             }, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            print("Dados inválidos: ", serializer.errors)
 
+            return Response({'detail': 'Usuário existente.'}, status=status.HTTP_400_BAD_REQUEST)
 # def index(request):
 # 	return render(request,'index.html')
 

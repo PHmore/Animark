@@ -1,4 +1,7 @@
 /* Criação de variáveis globais no css */
 :root {
     --primary-color: #0B604B;
+    --secundary-color: #0db78c;
+    --green-color: #14600b;
+    --transblack-color: rgba(0,0,0,0.7);
 }

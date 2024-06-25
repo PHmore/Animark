@@ -13,7 +13,7 @@
   <div class="card" style="width: 18rem;">
     <img class="card-img-top" src="{{ anime.images.jpg.image_url }}" alt="Imagem do Anime">
     <ul class="list-group list-group-flush">
-      <li class="list-group-item">Titulo: {{ anime.titulo }}</li>
+      <li class="list-group-item">Titulo: {{ anime.title }}</li>
       <li class="list-group-item">MAL ID: {{ anime.mal_id }}</li>
       <li class="list-group-item">Status: {{anime.status}}</li>
       <li class="list-group-item">Número de episodios: {{ anime.episodes }}</li>
@@ -43,8 +43,9 @@
   {% endfor %}
 </ul>
 {{page_obj}}
+
 <div class="pagination">
-  {% if page_obj.has_previous_page %}
+  {% if page_obj.current_page != 1 %}
   <a href="?page={{ page_obj.current_page|add:" -1" }}">Página Anterior</a>
   {% endif %}
 
