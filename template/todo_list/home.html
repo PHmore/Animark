@@ -30,7 +30,6 @@
                     </div>
                 </div>
             </li>
-            
             {% endfor %}
             <li class="list-group-item px-3 border-0">
                 <form action="{% url 'excluir-task' pk=anime.id %}" method="post">
@@ -79,8 +78,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 })
             }).then(response => {
                 if (response.ok) {
-                    // Update the episode position in the list
-                    updateEpisodePosition(animeId, episodioId, assistido);
+                    // Update the episode color
+                    updateEpisodeColor(episodioId, assistido);
                 } else {
                     // Handle error
                     console.error('Erro na atualização do episódio.');
@@ -92,13 +91,9 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    function updateEpisodePosition(animeId, episodioId, assistido) {
-        var episodeList = document.getElementById(`episode-list-${animeId}`);
-        var episodeItem = episodeList.querySelector(`.episode-item[data-episode-id="${episodioId}"]`);
+    function updateEpisodeColor(episodioId, assistido) {
+        var episodeItem = document.querySelector(`.episode-item[data-episode-id="${episodioId}"]`);
         var episodeNumber = episodeItem.querySelector('.episode-number');
-
-        // Set data-assistido attribute
-        episodeItem.setAttribute('data-assistido', assistido);
 
         // Update episode number style
         if (assistido) {
@@ -106,40 +101,6 @@ document.addEventListener('DOMContentLoaded', function () {
         } else {
             episodeNumber.classList.remove('marked');
         }
-
-        // Get all episode items
-        var episodeItems = Array.from(episodeList.querySelectorAll('.episode-item'));
-
-        // Separate into assistidos e não assistidos
-        var assistidos = episodeItems.filter(item => item.getAttribute('data-assistido') === 'true');
-        var naoAssistidos = episodeItems.filter(item => item.getAttribute('data-assistido') !== 'true');
-
-        // Ordenar os episódios pelo número do episódio
-        assistidos.sort(function(a, b) {
-            var numeroA = parseInt(a.querySelector('.episode-number').textContent.match(/\d+/)[0]);
-            var numeroB = parseInt(b.querySelector('.episode-number').textContent.match(/\d+/)[0]);
-            return numeroA - numeroB;
-        });
-
-        naoAssistidos.sort(function(a, b) {
-            var numeroA = parseInt(a.querySelector('.episode-number').textContent.match(/\d+/)[0]);
-            var numeroB = parseInt(b.querySelector('.episode-number').textContent.match(/\d+/)[0]);
-            return numeroA - numeroB;
-        });
-
-        // Limpar a lista de episódios
-        while (episodeList.firstChild) {
-            episodeList.removeChild(episodeList.firstChild);
-        }
-
-        // Adicionar os itens de episódio ordenados de volta à lista
-        naoAssistidos.forEach(function(item) {
-            episodeList.appendChild(item);
-        });
-
-        assistidos.forEach(function(item) {
-            episodeList.appendChild(item);
-        });
     }
 });
 </script>

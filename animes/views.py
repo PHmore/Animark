@@ -121,33 +121,32 @@ class AnimeSrcView(LoginRequiredMixin, View):
             'error_message': 'Erro ao processar os dados do anime.'
         })
       
-class AnimeTaskCreate(LoginRequiredMixin,View):
-    def post(self,request):
-        
+class AnimeTaskCreate(LoginRequiredMixin, View):
+    def post(self, request):
         titulo_anime = request.POST.get('title')
-        # descricao_anime = request.POST.get('descricao_anime')
-        # episodios = request.POST.getlist('episodios')
-        episodios = request.POST.get('episodes')
-        print("Titulo: ",titulo_anime," Episidios: ",episodios)
-        episodios = int(episodios)
-        mal_id = request.POST.get('mal_id')
-        mal_id = int(mal_id)
-        novo_anime = Anime.objects.create(
-            user=request.user,
-            mal_id=mal_id,
-            titulo=titulo_anime,
-            assistido=False,)
+        episodios = int(request.POST.get('episodes'))
+        mal_id = int(request.POST.get('mal_id'))
 
-        for ep in range(1, episodios+1):
-            numero_episodio = ep
-
-            Episodio.objects.create(
-                anime=novo_anime,
-                numero=numero_episodio,
+        try:
+            novo_anime = Anime.objects.create(
+                user=request.user,
+                mal_id=mal_id,
+                titulo=titulo_anime,
+                assistido=False,
             )
+
+            for ep in range(1, episodios + 1):
+                Episodio.objects.create(
+                    anime=novo_anime,
+                    numero=ep,
+                )
+
+            # Retorne um JSON indicando sucesso
+            return JsonResponse({'success': True, 'message': 'Anime adicionado com sucesso'})
         
-        # return render()
-        return redirect("/to_do_list")
+        except Exception as e:
+            # Em caso de erro, retorne um JSON indicando falha
+            return JsonResponse({'success': False, 'message': str(e)})
 
 class AnimeListAPI(APIView):
     print("Listando por API")

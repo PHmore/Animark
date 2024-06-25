@@ -1,124 +1,191 @@
-<!-- top_anime_list.html -->
-
 {% extends "../base.html" %}
 
-{% block titulo %} Lista animes {% endblock %}
+{% block titulo %} Lista de Animes {% endblock %}
+
+{% block css_local %}
+{% load static %}
+<link type="text/css" rel="stylesheet" href="{% static 'css/animes.css' %}">
+<style>
+  .anime-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin: 20px auto; /* Centraliza a grid */
+    max-width: 1200px; /* Define largura máxima para a grid */
+  }
+
+  .anime-grid .card {
+    width: calc(25% - 30px);
+    margin: 15px 0;
+    box-sizing: border-box;
+  }
+
+  @media (max-width: 992px) {
+    .anime-grid .card {
+      width: calc(50% - 30px);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .anime-grid .card {
+      width: calc(100% - 30px);
+    }
+  }
+
+  .pagination {
+    margin-top: 20px;
+    text-align: center;
+  }
+</style>
+{% endblock %}
 
 {% block conteudo %}
-
-<h1>Top Animes {{anime_data|length}} </h1>
-<ul>
-  <!-- Tomar cuidado com tratamento de dicionários ou itens únicos -->
+<div class="anime-grid">
   {% for anime in anime_data %}
-  <div class="card" style="width: 18rem;">
+  <div class="card col-md-3" id="anime-card-{{ anime.mal_id }}">
     <img class="card-img-top" src="{{ anime.images.jpg.image_url }}" alt="Imagem do Anime">
     <ul class="list-group list-group-flush">
-      <li class="list-group-item">Titulo: {{ anime.title }}</li>
+      <li class="list-group-item"><h1>{{ anime.title }}</h1></li>
       <li class="list-group-item">MAL ID: {{ anime.mal_id }}</li>
-      <li class="list-group-item">Status: {{anime.status}}</li>
-      <li class="list-group-item">Número de episodios: {{ anime.episodes }}</li>
+      <li class="list-group-item">Status: {{ anime.status }}</li>
+      <li class="list-group-item">Número de episódios: {{ anime.episodes }}</li>
     </ul>
     <div class="card-body">
-
       {% if anime.in_list %}
       <button type="button" class="btn btn-secondary" disabled>Adicionado</button>
       {% else %}
-      <form id="anime-form" method="POST" action="{% url 'task_create' %}">
+      <form class="anime-form" data-anime-id="{{ anime.mal_id }}">
         {% csrf_token %}
-        <input type="hidden" name="episodes" value="{{anime.episodes}}">
-        <input type="hidden" name="title" value="{{anime.title}}">
-        <input type="hidden" name="mal_id" value="{{anime.mal_id}}">
+        <input type="hidden" name="episodes" value="{{ anime.episodes }}">
+        <input type="hidden" name="title" value="{{ anime.title }}">
+        <input type="hidden" name="mal_id" value="{{ anime.mal_id }}">
         <input class="btn btn-success" type="submit" value="Adicionar">
       </form>
       {% endif %}
-
     </div>
   </div>
-
-  <div class="d-none dflex" id="div-titulo{{anime.mal_id}}">
-    Este texto oculto será exibido após a função ser chamada
-    <button type="submit" class="btn" id="info{{anime.mal_id}}">icone</button>
-  </div>
-  </li>
   {% endfor %}
-</ul>
-{{page_obj}}
-
-<div class="pagination">
-  {% if page_obj.current_page != 1 %}
-  <a href="?page={{ page_obj.current_page|add:" -1" }}">Página Anterior</a>
-  {% endif %}
-
-  Página {{ page_obj.current_page }} de {{ page_obj.last_visible_page }}
-
-  {% if page_obj.has_next_page %}
-  <a href="?page={{ page_obj.current_page|add:" 1" }}">Próxima Página</a>
-  {% endif %}
-
 </div>
 
-<nav aria-label="...">
-  <ul class="pagination">
-    <li class="page-item">
-      <a class="page-link" href="#" aria-label="Previous">
-        <span aria-hidden="true">&laquo;</span>
-        <span class="sr-only">Previous</span>
-      </a>
-    </li>
-    <li class="page-item"><a class="page-link" href="#">1</a></li>
-    <li class="page-item active">
-      <a class="page-link" href="#">2 <span class="sr-only">(current)</span></a>
-    </li>
-    <li class="page-item"><a class="page-link" href="#">3</a></li>
-    <li class="page-item">
-      <a class="page-link" href="#" aria-label="Next">
-        <span aria-hidden="true">&raquo;</span>
-        <span class="sr-only">Next</span>
-      </a>
-    </li>
-  </ul>
-</nav>
+<div class="pagination" id="pagination">
+  <nav aria-label="...">
+    <ul class="pagination">
+      <li class="page-item">
+        {% if page_obj.current_page != 1 %}
+        <a class="page-link" href="?page={{ page_obj.current_page|add:"-1" }}" aria-label="Previous">
+        {% endif %}
+          <span aria-hidden="true">&laquo;</span>
+          <span class="sr-only">Previous</span>
+        </a>
+      </li>
+      {% for page_num in page_obj.paginator.page_range %}
+      <li class="page-item {% if page_num == page_obj.number %}active{% endif %}">
+        <a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a>
+      </li>
+      {% endfor %}
+      <li class="page-item">
+        {% if page_obj.has_next %}
+        <a class="page-link" href="?page={{ page_obj.current_page|add:"1" }}" aria-label="Next">
+        {% endif %}
+          <span aria-hidden="true">&raquo;</span>
+          <span class="sr-only">Next</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+</div>
 
-{% endblock %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const pagination = document.getElementById('pagination');
+  let nextPage = 2;  // Inicia com a próxima página após a página atual
+  let loading = false; // Flag para evitar múltiplos carregamentos simultâneos
 
+  window.addEventListener('scroll', function() {
+    if (!loading && pagination.getBoundingClientRect().bottom <= window.innerHeight) {
+      // O usuário chegou ao final da página atual, carrega mais conteúdo
+      loading = true; // Impede novos carregamentos enquanto este está em progresso
 
-<script type="text/javascript">
-  $("div.info").click(function () {
-    console.log("Quero info")
-  })
+      fetch(`?page=${nextPage}`, {
+        method: 'GET'
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.text();
+      })
+      .then(html => {
+        // Insere os novos cards na grid de animes
+        const animeGrid = document.querySelector('.anime-grid');
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = html.trim();
+        const newCards = tempDiv.querySelectorAll('.card');
+        
+        // Limita a quantidade de novos cards a serem adicionados
+        let count = 0;
+        newCards.forEach(card => {
+          if (count < 25) { // Apenas adiciona até 25 novos cards
+            animeGrid.appendChild(card);
+            count++;
+          }
+        });
 
-  $("div.titulo").click(function () {
-    console.log('Será mostrado a info');
-    var data_id = $(this).attr('data-titulo');
-    console.log(data_id);
-    $("div#div-titulo" + data_id).removeClass('d-none')
-    $("button#info" + data_id).on("click", function (e) {
-      e.preventDefault();
-      $.ajax({
-        type: 'GET',
-        <!-- Este deve ser o name até pq é feito um reverse -->
-        url: '{% url "anime_info" %}',
-        data: { 'data_id': data_id },
-        dataType: "json",
-        success: function (data) {
-          console.log("Mostrando informações");
-          $("div#div-titulo" + data_id).html(data.title)
+        nextPage++;  // Incrementa para a próxima página a ser carregada
+        loading = false; // Libera para um novo carregamento
+      })
+      .catch(error => {
+        console.error('Houve um problema com a operação fetch:', error);
+        loading = false; // Em caso de erro, também libera para um novo carregamento
+      });
+    }
+  });
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+  const forms = document.querySelectorAll('.anime-form');
+  
+  forms.forEach(function(form) {
+    form.addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      const animeId = form.getAttribute('data-anime-id');
+      const formData = new FormData(form);
+      
+      fetch("{% url 'task_create' %}", {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
+          'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+        },
+        body: formData
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data.success) {
+          // Atualiza o botão para "Adicionado" e desabilita
+          const card = document.getElementById('anime-card-' + animeId);
+          const button = card.querySelector('input[type="submit"]');
+          button.classList.remove('btn-success');
+          button.classList.add('btn-secondary');
+          button.value = 'Adicionado';
+          button.disabled = true;
+        } else {
+          // Lida com erros específicos
+          console.error('Erro ao adicionar o anime:', data.message);
         }
       })
-    })
-  })
+      .catch(error => {
+        console.error('Houve um problema com a operação fetch:', error);
+      });
+    });
+  });
+});
 </script>
-
-
-
-
-
-<!-- <ul>
-        {% for anime in anime_list.data %}
-            <li>{{ anime.titles.0.title }}</li>
-            <img src="{{ anime.images.jpg.image_url }}" alt="{{ anime.titles.0.title }}">
-        {% endfor %}
-    </ul>
-</body>
-</html>
- -->
+{% endblock %}

@@ -9,15 +9,15 @@ body {
 }
 
 .collapsible {
-    background-color: var(--primary-color);
-    color: #ffffff; /* Alterei para branco para contraste com o fundo preto */
-    cursor: pointer;
+    background-color: rgba(0, 0, 0, 0.4);
+    /* color: var(--secundary-color); Alterei para branco para contraste com o fundo preto */
+    color: white;
     padding: 1rem;
     width: 100%;
     border: none;
     text-align: left;
     outline: none;
-    font-size: 2rem;
+    font-size: 3rem;
     margin-bottom: 1rem;
     display: flex;
     justify-content: space-between;
@@ -26,7 +26,7 @@ body {
 }
 
 .collapsible span {
-    font-size: 5.5rem;
+    font-size: 3rem;
     /* Tamanho maior para o título */
 }
 
@@ -40,20 +40,42 @@ body {
 
 .active,
 .collapsible:hover {
-    background-color: #555;
+    background-color: var(--secundary-color);
 }
 
 .content {
     padding: 0 1rem;
     display: none;
     overflow: hidden;
-    background-color: #f1f1f1;
-    border: 1px solid #ddd;
+    background-color: hsla(0, 0%, 0%, 0.7);
+    border: 1px solid var(--secundary-color);
     margin-bottom: 1rem;
 }
 
 .anime-section {
-    margin-bottom: 2rem;
+    width: 80%; /* Ajuste a largura conforme necessário */
+    margin: 2rem auto;
+    background-color: hsla(0, 0%, 0%, 0.7); /* Cor de fundo da seção de anime */
+    padding: 0.5rem;
+    border-radius: 1rem;
+    box-shadow: 0 0 10rem rgba(0, 0, 0, 0.1);
+}
+
+.list-group {
+    max-height: 300px; /* Ajuste a altura máxima da lista */
+    overflow-y: auto;
+    background-color: var(--primary-color); /* Cor de fundo da lista */
+    border-radius: 5px;
+    padding: 10px;
+    margin-top: 10px;
+}
+
+.episode-item {
+    padding: 10px;
+    margin-bottom: 5px;
+    background-color: rgba(0, 0, 0, 0.4); /* Cor de fundo do item */
+    border-radius: 5px;
+    color: #c02d2d;
 }
 
 .checkbox-wrapper-8 .tgl {
@@ -133,14 +155,15 @@ body {
     }
     .checkbox-wrapper-8 .tgl-skewed + .tgl-btn:after {
         left: 100%;
-        content: attr(data-tg-on);
+        content: attr(data-tg-on);background: #600b0b;
     }
     .checkbox-wrapper-8 .tgl-skewed + .tgl-btn:before {
         left: 0;
         content: attr(data-tg-off);
+        background: #600b0b;
     }
     .checkbox-wrapper-8 .tgl-skewed + .tgl-btn:active {
-        background: #888;
+        background: #600b0b;
     }
     .checkbox-wrapper-8 .tgl-skewed + .tgl-btn:active:before {
         left: -10%;
@@ -150,12 +173,15 @@ body {
     }
     .checkbox-wrapper-8 .tgl-skewed:checked + .tgl-btn:before {
         left: -100%;
+        background: #86d993;
     }
     .checkbox-wrapper-8 .tgl-skewed:checked + .tgl-btn:after {
         left: 0;
+        background: #86d993;
     }
     .checkbox-wrapper-8 .tgl-skewed:checked + .tgl-btn:active:after {
         left: 10%;
+        background: #86d993;
     }
     
     /* Estilo para grifar o número do episódio */

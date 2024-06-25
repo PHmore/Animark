@@ -28,6 +28,11 @@ body {
     color: var(--primary-color);
     margin: 0 1rem;
 }
+#navbar_base .navtext {
+    font-size: 2.5rem;
+    color: var(--secundary-color);
+    margin: 0 1rem;
+}
 #navbar_base input,
 #navbar_base button {
     font-size: 2.5rem;
