@@ -39,10 +39,6 @@ class AnimeTaskList(LoginRequiredMixin, TemplateView):
         context['anime_dict'] = anime_dict
         return context
 
-class createTask ():
-    def post():
-        print("A criação de tasks será movida para essa view")
-
 class updateTask(LoginRequiredMixin, UpdateView):
     model = Episodio
     template_name = 'todo_list/home.html'

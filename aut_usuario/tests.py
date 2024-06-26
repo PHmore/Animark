@@ -1,47 +1,81 @@
-# tests/test_views.py
-
-from django.urls import reverse
+from django.contrib.auth.models import User
 from rest_framework.test import APITestCase
 from rest_framework import status
-from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
+from django.urls import reverse
 
-class AuthTests(APITestCase):
+class TestLoginAPI(APITestCase):
 
     def setUp(self):
-        self.user = User.objects.create_user(username='testuser', password='testpassword', first_name='Test', email='test@example.com')
-        self.token = Token.objects.create(user=self.user)
+        self.user = User.objects.create_user(username='testuser', password='12345', email='test@example.com')
 
     def test_login(self):
-        url = reverse('api-login')  # Certifique-se de que a URL do login seja correta
-        data = {
-            'username': 'testuser',
-            'password': 'testpassword'
-        }
+        url = reverse('api-login')
+        data = {'username': 'testuser', 'password': '12345'}
+
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn('token', response.data)
-        self.assertEqual(response.data['id'], self.user.id)
-        self.assertEqual(response.data['email'], self.user.email)
+        self.assertEqual(response.data['username'], 'testuser')
 
-    def test_register(self):
-        url = reverse('api-cadastro')  # Certifique-se de que a URL do registro seja correta
+    def test_login_invalid_credentials(self):
+        url = reverse('api-login')
+        data = {'username': 'testuser', 'password': 'wrongpassword'}
+
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('detail', response.data)
+
+    def test_login_missing_fields(self):
+        url = reverse('api-login')
+        data = {'username': 'testuser'}
+
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('detail', response.data)
+
+class TestLogoutAPI(APITestCase):
+
+    def setUp(self):
+        self.user = User.objects.create_user(username='testuser', password='12345')
+        self.token = Token.objects.create(user=self.user)
+        self.client.credentials(HTTP_AUTHORIZATION=f'Token {self.token.key}')
+
+    def test_logout(self):
+        url = reverse('api-logout')
+
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertFalse(Token.objects.filter(key=self.token.key).exists())
+
+class TestCadastroAPI(APITestCase):
+
+    def test_cadastro(self):
+        url = reverse('api-cadastro')
         data = {
-            'email': 'new@example.com',
-            'password': 'newpassword'
+            'username': 'newuser',
+            'password': 'newpassword',
+            'email': 'newuser@example.com',
+            'first_name': 'New',
+            'last_name': 'User'
         }
+
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertIn('token', response.data)
-        self.assertEqual(response.data['email'], 'new@example.com')
+        self.assertEqual(response.data['username'], 'newuser')
 
-        # Verifique se o usuário foi realmente criado
-        user = User.objects.get(email='new@example.com')
-        self.assertIsNotNone(user)
+    def test_cadastro_usuario_existente(self):
+        User.objects.create_user(username='existinguser', password='existingpassword', email='existing@example.com')
+        url = reverse('api-cadastro')
+        data = {
+            'username': 'existinguser',
+            'password': 'existingpassword',
+            'email': 'existing@example.com',
+            'first_name': 'Existing',
+            'last_name': 'User'
+        }
 
-    def test_logout(self):
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token.key)
-        url = reverse('api-logout')  # Certifique-se de que a URL do logout seja correta
-        response = self.client.post(url, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['mensagem'], 'Logout realizado com sucesso')
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('detail', response.data)

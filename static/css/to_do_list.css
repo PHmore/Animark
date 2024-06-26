@@ -49,7 +49,7 @@ body {
     overflow: hidden;
     background-color: hsla(0, 0%, 0%, 0.7);
     border: 1px solid var(--secundary-color);
-    margin-bottom: 1rem;
+    margin-bottom: 5rem;
 }
 
 .anime-section {
@@ -59,6 +59,7 @@ body {
     padding: 0.5rem;
     border-radius: 1rem;
     box-shadow: 0 0 10rem rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
 }
 
 .list-group {
@@ -77,6 +78,11 @@ body {
     border-radius: 5px;
     color: #c02d2d;
 }
+
+li.list-group-item.px-3.border-0 {
+    background: rgba(0, 0, 0, 0.4);
+}
+                
 
 .checkbox-wrapper-8 .tgl {
     display: none;
