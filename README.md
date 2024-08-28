@@ -45,4 +45,5 @@ forma de rodar o projeto
 - `JavaScript`
 
 ## Serviços Usados
-listar APIs usadas
+- `Jikan API v4`
+- Documentação API: https://jikan.moe/
