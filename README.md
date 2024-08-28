@@ -36,7 +36,7 @@ O usuário poderá através de uma API que mostrará diversos animes, escolher q
 Link git: https://github.com/PHmore/Animark.git
 
 ## Rodar o Projeto
-forma de rodar o projeto
+O projeto é executado via terminal através dos comandos Django para iniciar o servidor e utilizando o navegador para acessar as páginas.
 
 ## Tecnologias Usadas
 - `Django`
