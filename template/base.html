@@ -1,0 +1,55 @@
+<!-- Neste documento básico iremos fazer -->
+<!-- Primeiro uma navbar -->
+<!-- Um footer com informações pessoais e links de contato-->
+<!-- Talvez um barra lateral na esquerda -->
+
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+
+    {% load static %}
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block titulo %} HomePage {% endblock %}</title>
+    <link type="text/css" rel="stylesheet" href="{%static 'css/bootstrap/bootstrap.min.css' %}">
+    <script type="type/javascript" src="{% static 'js/bootstrap.js' %}"></script>
+    <link type="text/css" rel="stylesheet" href="{% static 'css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'css/variaveis.css' %}">
+    <script type="text/javascript" src="{% static 'js/jquery.js' %}"></script>
+
+    <!-- Colocamos este trecho para caso as páginas que herdarão a base tenham arquivos css especificos
+    as mesmas só precisaram mudar este bloco -->
+    {% block css_local %}{% endblock %}
+</head>
+
+<body>
+    <div id="menu">
+        {% block navbar %}
+        <nav id="navbar_base" class="navbar navbar-expand-lg fixed-top">
+            <a class="navbar-brand navtext">ANIMARK</a>
+            <a class="btn btn-outline-success my-2 my-sm-0 " href="/animes">Lista animes</a>
+            <a class="btn btn-outline-success my-2 my-sm-0" href="/to_do_list">To do list</a>
+            <form class="form-inline" method="get" action="{% url 'anime_search' %}">
+                <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" name="anime_nome">
+                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+            </form>
+            <a class="navbar-brand navtext">{{ user.username }}</a>
+            <a class="btn btn btn-outline-danger my-2 my-sm-0" href="/logout">Sair</a>
+        </nav>
+        
+        {% endblock %}
+    </div>
+    <div id="conteudo">
+        {% block conteudo %}
+        {% endblock %}
+    </div>
+    <footer id="footer" class="footer fixed-bottom">
+        <p>Feito por <a rel="nofollow" target="_blank" href="https://github.com/PHmore">PHmore</a></p>
+    </footer>
+
+
+</body>
+
+</html>

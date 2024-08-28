@@ -1,0 +1,148 @@
+/* No arquivo login.css */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 62.5%; /* Define 1rem como 10px */
+}
+
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+    background-image: url('../img/login_bg.svg');
+    background-size: cover;
+    background-position: center center;
+}
+
+.heading {
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: var(--primary-color); /* Defina sua variável de cor primária aqui */
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding: 0.5rem;
+    text-align: center;
+}
+
+.heading h1 {
+    font-size: 3rem;
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    background-color: rgba(0, 0, 0, 0.7);
+    box-shadow: 0 0 1rem rgba(0, 0, 0, 0.1);
+    padding: 4rem; /* Aumento do padding para maior espaçamento interno */
+    border-radius: 0.8rem;
+    width: 100%;
+    max-width: 40rem; /* Largura máxima do container */
+}
+
+.logo-img {
+    text-align: center;
+    margin-bottom: 2rem;
+    /* Adicionando sombra no formato da imagem */
+    box-shadow: 0 0 0 1.3rem var(--primary-color); /* Ajuste conforme necessário */
+}
+
+.logo-img img {
+    width: 100px; /* Ajuste conforme necessário */
+    height: auto;
+}
+
+.cadastro-form {
+    text-align: center;
+}
+
+.cadastro-form a {
+    display: block;
+    padding: 1rem; /* Ajuste conforme necessário */
+    font-size: 1.8rem; /* Ajuste conforme necessário */
+    color: var(--secundary-color); /* Defina sua variável de cor secundária aqui */
+    text-decoration: none; /* Remover sublinhado do link */
+    transition: color 0.3s ease; /* Transição suave de cor */
+}
+
+.cadastro-form a:hover {
+    color: var(--primary-color); /* Defina sua variável de cor primária aqui */
+}
+
+.cadastro-form h2 {
+    margin-bottom: 2rem; /* Aumento da margem inferior do título */
+    font-size: 3.5rem; /* Aumento do tamanho do título */
+    color: var(--secundary-color); /* Defina sua variável de cor secundária aqui */
+}
+
+.form-group {
+    margin-bottom: 2rem; /* Aumento da margem inferior dos campos */
+}
+
+.form-group input {
+    width: 100%;
+    padding: 1.5rem; /* Ajuste conforme necessário */
+    margin: 1rem;
+    font-size: 1.8rem; /* Ajuste conforme necessário */
+    border: 0.2rem solid var(--primary-color); /* Defina sua variável de cor primária aqui */
+    border-radius: 0.8rem; /* Ajuste conforme necessário */
+    background-color: rgba(0, 0, 0, 0.8); /* Cor de fundo desejada */
+    color: var(--secundary-color); /* Defina sua variável de cor secundária aqui */
+}
+
+input[type="submit"] {
+    background-color: var(--secundary-color); /* Defina sua variável de cor secundária aqui */
+    color: black;
+    border: none;
+    padding: 1.2rem 2rem; /* Ajuste do padding do botão */
+    margin-bottom: 2rem;
+    font-size: 1.8rem; /* Ajuste conforme necessário */
+    cursor: pointer;
+    border-radius: 0.8rem; /* Ajuste conforme necessário */
+    transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+input[type="submit"]:hover {
+    background-color: var(--primary-color); /* Defina sua variável de cor primária aqui */
+}
+
+.footer {
+    text-align: center;
+    font-size: 2rem; /* Ajuste do tamanho da fonte */
+    padding: 1rem;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    border-top: 0.1rem solid #000000; /* Linha superior */
+    background-color: rgba(0, 0, 0, 0.7);
+    color: var(--primary-color); /* Defina sua variável de cor primária aqui */
+}
+
+.footer p {
+    margin: 0;
+    padding: 0;
+}
+
+.alert {
+    margin-top: 1rem; /* Espaçamento acima do alerta */
+    text-align: center;
+    padding: 1rem; /* Aumento do padding do alerta */
+    background-color: #f8d7da; /* Cor de fundo do alerta */
+    color: #721c24; /* Cor do texto do alerta */
+    border: 0.2rem solid #f5c6cb; /* Aumento da espessura da borda do alerta */
+    border-radius: 0.8rem; /* Aumento do raio da borda do alerta */
+    width: 100%;
+    max-width: 40rem; /* Largura máxima do alerta */
+    font-size: 2rem; /* Ajuste do tamanho do texto */
+}

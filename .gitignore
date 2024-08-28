@@ -1,2 +1,4 @@
 # Ocultado arquivo de configuração do Django
 ANIMARK/settings.py
+# Oculta pycache independente de onde esteja
+**/__pycache__/

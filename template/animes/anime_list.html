@@ -1,0 +1,131 @@
+{% extends "../base.html" %}
+
+{% block titulo %} Lista de Animes {% endblock %}
+
+{% block css_local %}
+{% load static %}
+<link type="text/css" rel="stylesheet" href="{% static 'css/animes.css' %}">
+<style>
+  .anime-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin: 20px auto; /* Centraliza a grid */
+    max-width: 1200px; /* Define largura máxima para a grid */
+  }
+
+  .anime-grid .card {
+    width: calc(25% - 30px);
+    margin: 15px 0;
+    box-sizing: border-box;
+  }
+
+  @media (max-width: 992px) {
+    .anime-grid .card {
+      width: calc(50% - 30px);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .anime-grid .card {
+      width: calc(100% - 30px);
+    }
+  }
+
+  .pagination {
+    margin-top: 20px;
+    text-align: center;
+  }
+</style>
+{% endblock %}
+
+{% block conteudo %}
+<div class="anime-grid">
+  {% for anime in anime_data %}
+  <div class="card col-md-3" id="anime-card-{{ anime.mal_id }}">
+    <img class="card-img-top" src="{{ anime.images.jpg.image_url }}" alt="Imagem do Anime">
+    <ul class="list-group list-group-flush">
+      <li class="list-group-item"><h1>{{ anime.title }}</h1></li>
+      <li class="list-group-item">MAL ID: {{ anime.mal_id }}</li>
+      <li class="list-group-item">Status: {{ anime.status }}</li>
+      <li class="list-group-item">Número de episódios: {{ anime.episodes }}</li>
+    </ul>
+    <div class="card-body">
+      {% if anime.in_list %}
+      <button type="button" class="btn btn-secondary" disabled>Adicionado</button>
+      {% else %}
+      <form class="anime-form" data-anime-id="{{ anime.mal_id }}">
+        {% csrf_token %}
+        <input type="hidden" name="episodes" value="{{ anime.episodes }}">
+        <input type="hidden" name="title" value="{{ anime.title }}">
+        <input type="hidden" name="mal_id" value="{{ anime.mal_id }}">
+        <input class="btn btn-success" type="submit" value="Adicionar">
+      </form>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="pagination">
+  {% if page_obj.current_page != 1 %}
+  <a href="?page={{ page_obj.current_page|add:" -1" }}">Página Anterior</a>
+  {% endif %}
+
+  Página {{ page_obj.current_page }} de {{ page_obj.last_visible_page }}
+
+  {% if page_obj.has_next_page %}
+  <a href="?page={{ page_obj.current_page|add:" 1" }}">Próxima Página</a>
+  {% endif %}
+
+</div>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const forms = document.querySelectorAll('.anime-form');
+  
+  forms.forEach(function(form) {
+    form.addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      const animeId = form.getAttribute('data-anime-id');
+      const formData = new FormData(form);
+      
+      fetch("{% url 'task_create' %}", {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
+          'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+        },
+        body: formData
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data.success) {
+          // Atualiza o botão para "Adicionado" e desabilita
+          const card = document.getElementById('anime-card-' + animeId);
+          const button = card.querySelector('.anime-form input[type="submit"]');
+          button.classList.remove('btn-success');
+          button.classList.add('btn-secondary');
+          button.value = 'Adicionado';
+          button.disabled = true;
+        } else {
+          // Lida com erros específicos
+          console.error('Erro ao adicionar o anime:', data.message);
+        }
+      })
+      .catch(error => {
+        console.error('Houve um problema com a operação fetch:', error);
+      });
+    });
+  });
+});
+</script>
+{% endblock %}

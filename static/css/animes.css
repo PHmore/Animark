@@ -1,0 +1,109 @@
+/* top_anime_list.css */
+
+/* Define a base font size for the html element */
+html {
+    font-size: 62.5%; /* 62.5% of 16px is 10px, so 1rem = 10px */
+}
+
+/* Adjust the body's margin and padding */
+body {
+    margin-top: 10rem; /* Adjust this value based on your navbar height */
+    padding: 0 2rem; /* Side padding */
+}
+
+/* Style the grid container */
+.anime-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem; /* 20px spacing between grid items */
+    padding: 2rem; /* 20px padding inside the grid container */
+    max-width: 120rem; /* Maximum width of 1200px */
+    margin: 0 auto; /* Center the grid container */
+}
+
+/* Style individual cards */
+.card {
+    background-color: #0b604b86;
+    border: 0.1rem solid var(--primary-color); /* 1px border */
+    border-radius: 1rem; /* 10px border radius */
+    overflow: hidden;
+    box-shadow: 0 0.4rem 0.8rem rgba(0, 0, 0, 0.1); /* Shadow for the card */
+}
+
+/* Make the images responsive */
+.card-img-top {
+    width: 100%;
+    height: auto;
+}
+
+/* Style the list items */
+.list-group-item {
+    color: white;
+    font-size: 1.5rem;
+    background-color: #0b604b56;
+    border: none;
+}
+
+/* Style the card body */
+.card-body {
+    padding: 1rem; /* 10px padding */
+}
+
+/* Style the buttons inside the card body */
+.card-body .btn {
+    width: 100%;
+}
+
+/* Style the pagination container */
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin: 2rem 0; /* 20px margin on top and bottom */
+}
+
+/* Style active page items */
+.page-item.active .page-link {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+/* Style page links */
+.page-link {
+    color: #007bff;
+}
+
+/* Change page link color on hover */
+.page-link:hover {
+    color: #0056b3;
+}
+
+.anime-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin: 20px auto; /* Centraliza a grid */
+    max-width: 1200px; /* Define largura máxima para a grid */
+  }
+
+  .anime-grid .card {
+    width: calc(25% - 30px);
+    margin: 15px 0;
+    box-sizing: border-box;
+  }
+
+  @media (max-width: 992px) {
+    .anime-grid .card {
+      width: calc(50% - 30px);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .anime-grid .card {
+      width: calc(100% - 30px);
+    }
+  }
+
+  .pagination {
+    margin-top: 20px;
+    text-align: center;
+  }

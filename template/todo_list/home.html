@@ -1,0 +1,108 @@
+{% extends "../base.html" %}
+
+{% block titulo %} To do List {% endblock %}
+
+{% block css_local %}
+{% load static %}
+<link type="text/css" rel="stylesheet" href="{% static 'css/to_do_list.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+{% endblock %}
+
+{% block conteudo %}
+
+{% for anime, episodios in anime_dict.items %}
+<div class="anime-section">
+    <label class="collapsible">
+        <span>{{ anime.titulo }}</span>
+        <input type="checkbox" class="toggle-checkbox" style="display: none;">
+        <i class="fas fa-chevron-down"></i>
+    </label>
+    <div class="content" style="display: none;">
+        <ul class="list-group list-group-light" id="episode-list-{{ anime.id }}">
+            {% for episodio in episodios %}
+            <li class="list-group-item px-3 border-0 episode-item" data-episode-id="{{ episodio.id }}" data-assistido="{{ episodio.assistido }}">
+                <div class="episode-details">
+                    <span class="episode-number {% if episodio.assistido %}marked{% endif %}">Episódio Número: {{ episodio.numero }}</span>
+                    <div class="checkbox-wrapper-8">
+                        {% csrf_token %}
+                        <input id="cb3-{{ episodio.id }}" type="checkbox" name="assistido" class="assistido-checkbox tgl tgl-skewed" data-anime-id="{{ anime.id }}" data-episodio-id="{{ episodio.id }}" {% if episodio.assistido %} checked {% endif %}>
+                        <label class="tgl-btn" data-tg-off="OFF" data-tg-on="VISTO" for="cb3-{{ episodio.id }}"></label>
+                    </div>
+                </div>
+            </li>
+            {% endfor %}
+            <li class="list-group-item px-3 border-0">
+                <form action="{% url 'excluir-task' pk=anime.id %}" method="post">
+                    {% csrf_token %}
+                    <input type="submit" value="Excluir" class="btn btn-danger">
+                </form>
+            </li>
+        </ul>
+    </div>
+</div>
+{% endfor %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var toggleCheckboxes = document.querySelectorAll('.toggle-checkbox');
+    toggleCheckboxes.forEach(function (checkbox) {
+        checkbox.addEventListener('change', function () {
+            var content = this.closest('.anime-section').querySelector('.content');
+            var icon = this.closest('.collapsible').querySelector('i');
+            if (this.checked) {
+                content.style.display = 'block';
+                icon.classList.add('active');
+            } else {
+                content.style.display = 'none';
+                icon.classList.remove('active');
+            }
+        });
+    });
+
+    var assistidoCheckboxes = document.querySelectorAll('.assistido-checkbox');
+    assistidoCheckboxes.forEach(function (checkbox) {
+        checkbox.addEventListener('change', function () {
+            var animeId = this.getAttribute('data-anime-id');
+            var episodioId = this.getAttribute('data-episodio-id');
+            var assistido = this.checked;
+            var csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+            fetch("{% url 'marcar-ep' 0 0 %}".replace('0/0', `${animeId}/${episodioId}`), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    assistido: assistido
+                })
+            }).then(response => {
+                if (response.ok) {
+                    // Update the episode color
+                    updateEpisodeColor(episodioId, assistido);
+                } else {
+                    // Handle error
+                    console.error('Erro na atualização do episódio.');
+                }
+            }).catch(error => {
+                // Handle error
+                console.error('Erro na requisição:', error);
+            });
+        });
+    });
+
+    function updateEpisodeColor(episodioId, assistido) {
+        var episodeItem = document.querySelector(`.episode-item[data-episode-id="${episodioId}"]`);
+        var episodeNumber = episodeItem.querySelector('.episode-number');
+
+        // Update episode number style
+        if (assistido) {
+            episodeNumber.classList.add('marked');
+        } else {
+            episodeNumber.classList.remove('marked');
+        }
+    }
+});
+</script>
+
+{% endblock %}
